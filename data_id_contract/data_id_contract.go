@@ -4,7 +4,6 @@ import (
 	"github.com/ontio/ddxf-sdk/base_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
-	"github.com/zhiqiangxu/ont-gateway/pkg/ddxf/seller/server"
 )
 
 type DataIdContractKit struct {
@@ -21,13 +20,17 @@ func NewDataIdContractKit(
 	}
 }
 
-func (this *DataIdContractKit) RegisterDataIdInfo(info server.DataIdInfo,
+func (this *DataIdContractKit) SetContractAddress(dataId common.Address) {
+	this.contractAddress = dataId
+}
+
+func (this *DataIdContractKit) RegisterDataIdInfo(info DataIdInfo,
 	seller *ontology_go_sdk.Account) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, seller, "registerDataId",
 		[]interface{}{info.ToBytes()})
 }
 
-func (this *DataIdContractKit) GetDataIdInfo(dataId string) (*server.DataIdInfo, error) {
+func (this *DataIdContractKit) GetDataIdInfo(dataId string) (*DataIdInfo, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "getDataIdInfo",
 		[]interface{}{dataId})
 	if err != nil {
@@ -37,7 +40,7 @@ func (this *DataIdContractKit) GetDataIdInfo(dataId string) (*server.DataIdInfo,
 	if err != nil {
 		return nil, err
 	}
-	info := &server.DataIdInfo{}
+	info := &DataIdInfo{}
 	err = info.FromBytes(data)
 	if err != nil {
 		return nil, err

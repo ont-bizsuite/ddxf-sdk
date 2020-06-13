@@ -2,13 +2,9 @@ package ddxf_contract
 
 import (
 	"github.com/ontio/ddxf-sdk/base_contract"
+	"github.com/ontio/ddxf-sdk/split_policy_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
-	"github.com/zhiqiangxu/ddxf"
-	common4 "github.com/zhiqiangxu/ont-gateway/pkg/ddxf/common"
-	"github.com/zhiqiangxu/ont-gateway/pkg/ddxf/config"
-	"github.com/zhiqiangxu/ont-gateway/pkg/ddxf/contract"
-	"github.com/zhiqiangxu/ont-gateway/pkg/ddxf/param"
 )
 
 type DDXFContractKit struct {
@@ -21,6 +17,10 @@ func NewDDXFContractKit(contractAddress common.Address, bc *base_contract.BaseCo
 		contractAddress: contractAddress,
 		bc:              bc,
 	}
+}
+
+func (this *DDXFContractKit) SetContractAddress(addr common.Address) {
+	this.contractAddress = addr
 }
 
 func (this *DDXFContractKit) Init(admin *ontology_go_sdk.Account, dtoken, splitPolicy common.Address) (common.Uint256, error) {
@@ -61,32 +61,10 @@ func (this *DDXFContractKit) getSplitPolicyContractAddress() (common.Address, er
 }
 
 //publish product on block chain,
-func (this *DDXFContractKit) Publish(seller *ontology_go_sdk.Account, dataMeta DataMetaInfo,
-	tokenMeta TokenMetaInfo, itemMeta map[string]interface{},
-	splitPolicyParam SplitPolicy) (common.Uint256, error) {
-	tokenTemplate := &param.TokenTemplate{
-		DataID:     dataMeta.DataId,
-		TokenHashs: []string{tokenMeta.TokenMetaHash},
-	}
-	trt := &param.TokenResourceTyEndpoint{
-		TokenTemplate: tokenTemplate,
-		ResourceType:  dataMeta.ResourceType,
-		Endpoint:      tokenMeta.TokenEndpoint,
-	}
-	resourceIdBytes := []byte(common4.GenerateUUId(config.UUID_RESOURCE_ID))
-	bs, err := ddxf.HashObject(itemMeta)
-	if err != nil {
-		return common.UINT256_EMPTY, err
-	}
-	itemMetaHash, err := common.Uint256ParseFromBytes(bs[:])
-
-	resourceDDOBytes, itemBytes := contract.ConstructPublishParam(seller.Address,
-		tokenTemplate,
-		[]*param.TokenResourceTyEndpoint{trt},
-		itemMetaHash, dataMeta.Fee, dataMeta.ExpiredDate, dataMeta.Stock)
-
-	return this.bc.Invoke(this.contractAddress, seller, "dtokenSellerPublish", []interface{}{resourceIdBytes,
-		resourceDDOBytes, itemBytes, splitPolicyParam.ToBytes()})
+func (this *DDXFContractKit) Publish(seller *ontology_go_sdk.Account, resourceId []byte, ddo ResourceDDO, item DTokenItem,
+	splitPolicyParam split_policy_contract.SplitPolicy) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, seller, "dtokenSellerPublish",
+		[]interface{}{resourceId, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
 }
 func (this *DDXFContractKit) getPublishProductInfo(resourceId []byte) (*ProductInfoOnChain, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "getSellerItemInfo",
@@ -113,7 +91,7 @@ func (this *DDXFContractKit) BuyDtoken(buyer *ontology_go_sdk.Account, resourceI
 }
 
 func (this *DDXFContractKit) UseToken(resourceId []byte, buyer *ontology_go_sdk.Account,
-	tokenTemplate param.TokenTemplate, n int) (common.Uint256, error) {
+	tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, buyer, "useToken",
 		[]interface{}{resourceId, buyer.Address, tokenTemplate, n})
 }
@@ -139,7 +117,7 @@ func (this *DDXFContractKit) SetAgents(resourceId []byte, account *ontology_go_s
 }
 
 func (this *DDXFContractKit) SetTokenAgents(resourceId []byte, account *ontology_go_sdk.Account,
-	agents []common.Address, tokenTemplate param.TokenTemplate, n int) (common.Uint256, error) {
+	agents []common.Address, tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "setTokenAgents",
 		[]interface{}{resourceId, account.Address, agents, tokenTemplate.ToBytes(), n})
 }
@@ -151,7 +129,7 @@ func (this *DDXFContractKit) AddAgents(resourceId []byte, account *ontology_go_s
 }
 
 func (this *DDXFContractKit) AddTokenAgents(resourceId []byte, account *ontology_go_sdk.Account,
-	agents []common.Address, tokenTemplate param.TokenTemplate, n int) (common.Uint256, error) {
+	agents []common.Address, tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "addTokenAgents",
 		[]interface{}{resourceId, account.Address, tokenTemplate.ToBytes(), agents, n})
 }
@@ -162,7 +140,7 @@ func (this *DDXFContractKit) RemoveAgents(resourceId []byte, account *ontology_g
 		[]interface{}{resourceId, account.Address, agents})
 }
 
-func (this *DDXFContractKit) RemoveTokenAgents(resourceId []byte, tokenTemplate param.TokenTemplate, account *ontology_go_sdk.Account,
+func (this *DDXFContractKit) RemoveTokenAgents(resourceId []byte, tokenTemplate TokenTemplate, account *ontology_go_sdk.Account,
 	agents []common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "removeAgents",
 		[]interface{}{resourceId, tokenTemplate.ToBytes(), account.Address, agents})

@@ -2,7 +2,6 @@ package split_policy_contract
 
 import (
 	"github.com/ontio/ontology/common"
-	"github.com/zhiqiangxu/ont-gateway/pkg/ddxf/io"
 )
 
 type AddrAmt struct {
@@ -17,7 +16,7 @@ func (this *AddrAmt) Serialize(sink *common.ZeroCopySink) {
 
 type SplitPolicy struct {
 	AddrAmts []AddrAmt
-	TokenTy  io.TokenType
+	TokenTy  TokenType
 }
 
 func (this *SplitPolicy) ToBytes() []byte {

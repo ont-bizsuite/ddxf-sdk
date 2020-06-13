@@ -17,6 +17,11 @@ const (
 )
 
 const (
+	TestNet = "http://dappnode1.ont.io:20336"
+	MainNet = "http://polaris1.ont.io:20336"
+)
+
+const (
 	defaultGasPrice = 500
 	defaultGasLimit = 20000000
 )
@@ -52,7 +57,7 @@ func (sdk *DdxfSdk) SetGasPrice(gasPrice uint64) {
 }
 
 func (sdk *DdxfSdk) GetOntologySdk() *ontology_go_sdk.OntologySdk {
-	return sdk.GetOntologySdk()
+	return sdk.sdk
 }
 
 func (sdk *DdxfSdk) DefaultDataIdContract() *data_id_contract.DataIdContractKit {
@@ -73,6 +78,10 @@ func (sdk *DdxfSdk) DefaultDDXFContract() *ddxf_contract.DDXFContractKit {
 	return sdk.defaultDdxfContract
 }
 
+func (sdk *DdxfSdk) SetDDXFContractAddress(ddxf common.Address) {
+	sdk.DefaultDDXFContract()
+}
+
 func (sdk *DdxfSdk) GetSmartCodeEvent(txHash string) (*common2.SmartContactEvent, error) {
 	for i := 0; i < 10; i++ {
 		event, err := sdk.sdk.GetSmartContractEvent(txHash)
@@ -87,4 +96,12 @@ func (sdk *DdxfSdk) GetSmartCodeEvent(txHash string) (*common2.SmartContactEvent
 		}
 	}
 	return nil, fmt.Errorf("GetSmartCodeEvent timeout, txhash: %s", txHash)
+}
+
+func (this *DdxfSdk) DeployContract(signer *ontology_go_sdk.Account, code,
+	name, version, author, email,
+	desc string) (common.Uint256, error) {
+	return this.sdk.WasmVM.DeployWasmVMSmartContract(defaultGasLimit*2,
+		defaultGasPrice, signer, code, name,
+		version, author, email, desc)
 }

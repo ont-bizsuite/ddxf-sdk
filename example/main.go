@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/ontio/ddxf-sdk"
+	"github.com/ontio/ddxf-sdk/ddxf_contract"
 	"github.com/ontio/ddxf-sdk/split_policy_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
+	"github.com/zhiqiangxu/ddxf"
 	"io/ioutil"
 	"time"
-	"github.com/ontio/ddxf-sdk/ddxf_contract"
-	"github.com/zhiqiangxu/ddxf"
 )
 
 func main() {
@@ -62,10 +62,10 @@ func testDdxf(sdk *ddxf_sdk.DdxfSdk, wallet *ontology_go_sdk.Wallet, pwd []byte)
 
 	ddo := ddxf_contract.ResourceDDO{
 		TokenResourceTyEndpoints: []*ddxf_contract.TokenResourceTyEndpoint{trt}, // RT for tokens
-		Manager:                  seller.Address,                        // data owner id
-		ItemMetaHash:             itemMetaHash,                          // required if len(Templates) > 1
-		DTC:                      common.ADDRESS_EMPTY,                  // can be empty
-		MP:                       common.ADDRESS_EMPTY,                  // can be empty
+		Manager:                  seller.Address,                                // data owner id
+		ItemMetaHash:             itemMetaHash,                                  // required if len(Templates) > 1
+		DTC:                      common.ADDRESS_EMPTY,                          // can be empty
+		MP:                       common.ADDRESS_EMPTY,                          // can be empty
 		Split:                    common.ADDRESS_EMPTY,
 	}
 
@@ -78,7 +78,7 @@ func testDdxf(sdk *ddxf_sdk.DdxfSdk, wallet *ontology_go_sdk.Wallet, pwd []byte)
 		Stocks:      10000,
 		Templates:   []*ddxf_contract.TokenTemplate{tokenTemplate},
 	}
-	sp := split_policy_contract.SplitPolicy{
+	sp := split_policy_contract.SplitPolicyRegisterParam{
 		AddrAmts: []split_policy_contract.AddrAmt{},
 		TokenTy:  split_policy_contract.ONG,
 	}

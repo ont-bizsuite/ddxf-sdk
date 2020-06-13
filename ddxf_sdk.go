@@ -30,8 +30,8 @@ type DdxfSdk struct {
 	sdk                   *ontology_go_sdk.OntologySdk
 	bc                    *base_contract.BaseContract
 	rpc                   string
-	defaultDdxfContract   *ddxf_contract.DDXFContractKit
-	defaultDataIdContract *data_id_contract.DataIdContractKit
+	defaultDdxfContract   *ddxf_contract.DDXFKit
+	defaultDataIdContract *data_id_contract.DataIdKit
 }
 
 func NewDdxfSdk(addr string) *DdxfSdk {
@@ -60,7 +60,7 @@ func (sdk *DdxfSdk) GetOntologySdk() *ontology_go_sdk.OntologySdk {
 	return sdk.sdk
 }
 
-func (sdk *DdxfSdk) DefaultDataIdContract() *data_id_contract.DataIdContractKit {
+func (sdk *DdxfSdk) DefaultDataIdContract() *data_id_contract.DataIdKit {
 	if sdk.defaultDataIdContract == nil {
 		contractAddress, _ := common.AddressFromHexString(dataIdContractAddress)
 		sdk.defaultDataIdContract = data_id_contract.NewDataIdContractKit(contractAddress,
@@ -69,7 +69,7 @@ func (sdk *DdxfSdk) DefaultDataIdContract() *data_id_contract.DataIdContractKit 
 	return sdk.defaultDataIdContract
 }
 
-func (sdk *DdxfSdk) DefaultDDXFContract() *ddxf_contract.DDXFContractKit {
+func (sdk *DdxfSdk) DefaultDDXFContract() *ddxf_contract.DDXFKit {
 	if sdk.defaultDdxfContract == nil {
 		contractAddress, _ := common.AddressFromHexString(dDXFContractAddress)
 		sdk.defaultDdxfContract = ddxf_contract.NewDDXFContractKit(contractAddress,

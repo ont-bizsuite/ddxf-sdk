@@ -7,32 +7,32 @@ import (
 	"github.com/ontio/ontology/common"
 )
 
-type DDXFContractKit struct {
+type DDXFKit struct {
 	bc              *base_contract.BaseContract
 	contractAddress common.Address
 }
 
-func NewDDXFContractKit(contractAddress common.Address, bc *base_contract.BaseContract) *DDXFContractKit {
-	return &DDXFContractKit{
+func NewDDXFContractKit(contractAddress common.Address, bc *base_contract.BaseContract) *DDXFKit {
+	return &DDXFKit{
 		contractAddress: contractAddress,
 		bc:              bc,
 	}
 }
 
-func (this *DDXFContractKit) SetContractAddress(addr common.Address) {
+func (this *DDXFKit) SetContractAddress(addr common.Address) {
 	this.contractAddress = addr
 }
 
-func (this *DDXFContractKit) Init(admin *ontology_go_sdk.Account, dtoken, splitPolicy common.Address) (common.Uint256, error) {
+func (this *DDXFKit) Init(admin *ontology_go_sdk.Account, dtoken, splitPolicy common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, admin, "init",
 		[]interface{}{dtoken, splitPolicy})
 }
 
-func (this *DDXFContractKit) setDTokenContractAddress(admin *ontology_go_sdk.Account, dtoken common.Address) (common.Uint256, error) {
+func (this *DDXFKit) setDTokenContractAddress(admin *ontology_go_sdk.Account, dtoken common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, admin, "setDTokenContract", []interface{}{dtoken})
 }
 
-func (this *DDXFContractKit) getDTokenContractAddress() (common.Address, error) {
+func (this *DDXFKit) getDTokenContractAddress() (common.Address, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "getDTokenContract", []interface{}{})
 	if err != nil {
 		return common.ADDRESS_EMPTY, err
@@ -44,11 +44,11 @@ func (this *DDXFContractKit) getDTokenContractAddress() (common.Address, error) 
 	return common.AddressParseFromBytes(data)
 }
 
-func (this *DDXFContractKit) setSplitPolicyContractAddress(admin *ontology_go_sdk.Account, dtoken common.Address) (common.Uint256, error) {
+func (this *DDXFKit) setSplitPolicyContractAddress(admin *ontology_go_sdk.Account, dtoken common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, admin, "setSplitPolicyContract", []interface{}{dtoken})
 }
 
-func (this *DDXFContractKit) getSplitPolicyContractAddress() (common.Address, error) {
+func (this *DDXFKit) getSplitPolicyContractAddress() (common.Address, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "getSplitPolicyContract", []interface{}{})
 	if err != nil {
 		return common.ADDRESS_EMPTY, err
@@ -61,12 +61,12 @@ func (this *DDXFContractKit) getSplitPolicyContractAddress() (common.Address, er
 }
 
 //publish product on block chain,
-func (this *DDXFContractKit) Publish(seller *ontology_go_sdk.Account, resourceId []byte, ddo ResourceDDO, item DTokenItem,
-	splitPolicyParam split_policy_contract.SplitPolicy) (common.Uint256, error) {
+func (this *DDXFKit) Publish(seller *ontology_go_sdk.Account, resourceId []byte, ddo ResourceDDO, item DTokenItem,
+	splitPolicyParam split_policy_contract.SplitPolicyRegisterParam) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, seller, "dtokenSellerPublish",
 		[]interface{}{resourceId, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
 }
-func (this *DDXFContractKit) getPublishProductInfo(resourceId []byte) (*ProductInfoOnChain, error) {
+func (this *DDXFKit) getPublishProductInfo(resourceId []byte) (*ProductInfoOnChain, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "getSellerItemInfo",
 		[]interface{}{resourceId})
 	if err != nil {
@@ -84,19 +84,19 @@ func (this *DDXFContractKit) getPublishProductInfo(resourceId []byte) (*ProductI
 	return p, nil
 }
 
-func (this *DDXFContractKit) BuyDtoken(buyer *ontology_go_sdk.Account, resourceId []byte,
+func (this *DDXFKit) BuyDtoken(buyer *ontology_go_sdk.Account, resourceId []byte,
 	n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, buyer, "buyDtoken",
 		[]interface{}{resourceId, n, buyer.Address})
 }
 
-func (this *DDXFContractKit) UseToken(resourceId []byte, buyer *ontology_go_sdk.Account,
+func (this *DDXFKit) UseToken(resourceId []byte, buyer *ontology_go_sdk.Account,
 	tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, buyer, "useToken",
 		[]interface{}{resourceId, buyer.Address, tokenTemplate, n})
 }
 
-func (this *DDXFContractKit) BuyDtokens(buyer *ontology_go_sdk.Account,
+func (this *DDXFKit) BuyDtokens(buyer *ontology_go_sdk.Account,
 	param []ResourceIdAndN) (common.Uint256, error) {
 	rids := make([]interface{}, len(param))
 	for i := 0; i < len(param); i++ {
@@ -110,37 +110,37 @@ func (this *DDXFContractKit) BuyDtokens(buyer *ontology_go_sdk.Account,
 		[]interface{}{rids, ns, buyer.Address})
 }
 
-func (this *DDXFContractKit) SetAgents(resourceId []byte, account *ontology_go_sdk.Account,
+func (this *DDXFKit) SetAgents(resourceId []byte, account *ontology_go_sdk.Account,
 	agents []common.Address, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "setAgents",
 		[]interface{}{resourceId, account.Address, agents, n})
 }
 
-func (this *DDXFContractKit) SetTokenAgents(resourceId []byte, account *ontology_go_sdk.Account,
+func (this *DDXFKit) SetTokenAgents(resourceId []byte, account *ontology_go_sdk.Account,
 	agents []common.Address, tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "setTokenAgents",
 		[]interface{}{resourceId, account.Address, agents, tokenTemplate.ToBytes(), n})
 }
 
-func (this *DDXFContractKit) AddAgents(resourceId []byte, account *ontology_go_sdk.Account,
+func (this *DDXFKit) AddAgents(resourceId []byte, account *ontology_go_sdk.Account,
 	agents []common.Address, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "addAgents",
 		[]interface{}{resourceId, account.Address, agents, n})
 }
 
-func (this *DDXFContractKit) AddTokenAgents(resourceId []byte, account *ontology_go_sdk.Account,
+func (this *DDXFKit) AddTokenAgents(resourceId []byte, account *ontology_go_sdk.Account,
 	agents []common.Address, tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "addTokenAgents",
 		[]interface{}{resourceId, account.Address, tokenTemplate.ToBytes(), agents, n})
 }
 
-func (this *DDXFContractKit) RemoveAgents(resourceId []byte, account *ontology_go_sdk.Account,
+func (this *DDXFKit) RemoveAgents(resourceId []byte, account *ontology_go_sdk.Account,
 	agents []common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "removeAgents",
 		[]interface{}{resourceId, account.Address, agents})
 }
 
-func (this *DDXFContractKit) RemoveTokenAgents(resourceId []byte, tokenTemplate TokenTemplate, account *ontology_go_sdk.Account,
+func (this *DDXFKit) RemoveTokenAgents(resourceId []byte, tokenTemplate TokenTemplate, account *ontology_go_sdk.Account,
 	agents []common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "removeAgents",
 		[]interface{}{resourceId, tokenTemplate.ToBytes(), account.Address, agents})

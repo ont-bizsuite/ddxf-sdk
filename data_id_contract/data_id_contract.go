@@ -6,31 +6,31 @@ import (
 	"github.com/ontio/ontology/common"
 )
 
-type DataIdContractKit struct {
+type DataIdKit struct {
 	bc              *base_contract.BaseContract
 	contractAddress common.Address
 }
 
 func NewDataIdContractKit(
 	contractAddress common.Address,
-	bc *base_contract.BaseContract) *DataIdContractKit {
-	return &DataIdContractKit{
+	bc *base_contract.BaseContract) *DataIdKit {
+	return &DataIdKit{
 		contractAddress: contractAddress,
 		bc:              bc,
 	}
 }
 
-func (this *DataIdContractKit) SetContractAddress(dataId common.Address) {
+func (this *DataIdKit) SetContractAddress(dataId common.Address) {
 	this.contractAddress = dataId
 }
 
-func (this *DataIdContractKit) RegisterDataIdInfo(info DataIdInfo,
+func (this *DataIdKit) RegisterDataIdInfo(info DataIdInfo,
 	seller *ontology_go_sdk.Account) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, seller, "registerDataId",
 		[]interface{}{info.ToBytes()})
 }
 
-func (this *DataIdContractKit) GetDataIdInfo(dataId string) (*DataIdInfo, error) {
+func (this *DataIdKit) GetDataIdInfo(dataId string) (*DataIdInfo, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "getDataIdInfo",
 		[]interface{}{dataId})
 	if err != nil {

@@ -1,8 +1,8 @@
 package data_id_contract
 
 import (
-	"github.com/ontio/ontology/common"
 	"fmt"
+	"github.com/ontio/ontology/common"
 )
 
 type DataIdInfo struct {

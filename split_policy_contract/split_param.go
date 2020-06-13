@@ -6,10 +6,9 @@ import (
 )
 
 type AddrAmt struct {
-	To common.Address
+	To      common.Address
 	percent uint32
 }
-
 
 func (this *AddrAmt) Serialize(sink *common.ZeroCopySink) {
 	sink.WriteAddress(this.To)
@@ -18,7 +17,7 @@ func (this *AddrAmt) Serialize(sink *common.ZeroCopySink) {
 
 type SplitPolicy struct {
 	AddrAmts []AddrAmt
-	TokenTy io.TokenType
+	TokenTy  io.TokenType
 }
 
 func (this *SplitPolicy) ToBytes() []byte {

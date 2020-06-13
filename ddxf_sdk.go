@@ -1,11 +1,14 @@
 package ddxf_sdk
 
 import (
-	"github.com/ontio/ontology-go-sdk"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ddxf-sdk/ddxf_contract"
-	"github.com/ontio/ddxf-sdk/data_id_contract"
+	"fmt"
 	"github.com/ontio/ddxf-sdk/base_contract"
+	"github.com/ontio/ddxf-sdk/data_id_contract"
+	"github.com/ontio/ddxf-sdk/ddxf_contract"
+	"github.com/ontio/ontology-go-sdk"
+	common2 "github.com/ontio/ontology-go-sdk/common"
+	"github.com/ontio/ontology/common"
+	"time"
 )
 
 const (
@@ -19,6 +22,7 @@ const (
 )
 
 type DdxfSdk struct {
+	sdk                   *ontology_go_sdk.OntologySdk
 	bc                    *base_contract.BaseContract
 	rpc                   string
 	defaultDdxfContract   *ddxf_contract.DDXFContractKit
@@ -29,6 +33,7 @@ func NewDdxfSdk(addr string) *DdxfSdk {
 	sdk := ontology_go_sdk.NewOntologySdk()
 	sdk.NewRpcClient().SetAddress(addr)
 	return &DdxfSdk{
+		sdk: sdk,
 		rpc: addr,
 		bc:  base_contract.NewBaseContract(sdk, defaultGasLimit, defaultGasPrice, nil),
 	}
@@ -66,4 +71,20 @@ func (sdk *DdxfSdk) DefaultDDXFContract() *ddxf_contract.DDXFContractKit {
 			sdk.bc)
 	}
 	return sdk.defaultDdxfContract
+}
+
+func (sdk *DdxfSdk) GetSmartCodeEvent(txHash string) (*common2.SmartContactEvent, error) {
+	for i := 0; i < 10; i++ {
+		event, err := sdk.sdk.GetSmartContractEvent(txHash)
+		if event != nil {
+			return event, err
+		}
+		if err != nil {
+			return nil, err
+		}
+		if event == nil {
+			time.Sleep(3 * time.Second)
+		}
+	}
+	return nil, fmt.Errorf("GetSmartCodeEvent timeout, txhash: %s", txHash)
 }

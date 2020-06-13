@@ -1,6 +1,7 @@
 package ddxf_contract
 
 import (
+	"github.com/ontio/ddxf-sdk/base_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
 	"github.com/zhiqiangxu/ddxf"
@@ -8,7 +9,6 @@ import (
 	"github.com/zhiqiangxu/ont-gateway/pkg/ddxf/config"
 	"github.com/zhiqiangxu/ont-gateway/pkg/ddxf/contract"
 	"github.com/zhiqiangxu/ont-gateway/pkg/ddxf/param"
-	"github.com/ontio/ddxf-sdk/base_contract"
 )
 
 type DDXFContractKit struct {

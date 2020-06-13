@@ -31,7 +31,7 @@ type ProductInfoOnChain struct {
 
 type ResourceIdAndN struct {
 	ResourceId []byte
-	N int
+	N          int
 }
 
 func (this *ProductInfoOnChain) Deserialize(source *common.ZeroCopySource) error {

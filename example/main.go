@@ -38,6 +38,7 @@ func main() {
 	sdk.SetDDXFContractAddress(contractAddr)
 }
 
+
 func testDdxf(sdk *ddxf_sdk.DdxfSdk, wallet *ontology_go_sdk.Wallet, pwd []byte) {
 	seller, _ := wallet.GetAccountByAddress("Aejfo7ZX5PVpenRj23yChnyH64nf8T1zbu", pwd)
 	dataId := ""
@@ -78,8 +79,9 @@ func testDdxf(sdk *ddxf_sdk.DdxfSdk, wallet *ontology_go_sdk.Wallet, pwd []byte)
 		Stocks:      10000,
 		Templates:   []*ddxf_contract.TokenTemplate{tokenTemplate},
 	}
+
 	sp := split_policy_contract.SplitPolicyRegisterParam{
-		AddrAmts: []split_policy_contract.AddrAmt{},
+		AddrAmts: []*split_policy_contract.AddrAmt{},
 		TokenTy:  split_policy_contract.ONG,
 	}
 	txHash, err := sdk.DefaultDDXFContract().Publish(seller, resourceIdBytes, ddo, item, sp)

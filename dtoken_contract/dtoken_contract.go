@@ -14,8 +14,8 @@ type DTokenKit struct {
 
 func NewDTokenKit(contractAddress common.Address, bc *base_contract.BaseContract) *DTokenKit {
 	return &DTokenKit{
-		contractAddress:contractAddress,
-		bc:bc,
+		contractAddress: contractAddress,
+		bc:              bc,
 	}
 }
 

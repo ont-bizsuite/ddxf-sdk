@@ -67,7 +67,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestDTokenKit_GetDDXFContractAddr(t *testing.T) {
-	addr,err := dTokenKit.GetDDXFContractAddr()
+	addr, err := dTokenKit.GetDDXFContractAddr()
 	assert.Nil(t, err)
 	fmt.Println("addr: ", addr.ToHexString())
 }

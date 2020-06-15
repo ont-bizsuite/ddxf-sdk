@@ -41,11 +41,11 @@ func NewDdxfSdk(addr string) *DdxfSdk {
 	sdk := ontology_go_sdk.NewOntologySdk()
 	sdk.NewRpcClient().SetAddress(addr)
 	return &DdxfSdk{
-		sdk: sdk,
-		rpc: addr,
-		gasPrice:defaultGasPrice,
-		gasLimit:defaultGasLimit,
-		bc:  base_contract.NewBaseContract(sdk, defaultGasLimit, defaultGasPrice, nil),
+		sdk:      sdk,
+		rpc:      addr,
+		gasPrice: defaultGasPrice,
+		gasLimit: defaultGasLimit,
+		bc:       base_contract.NewBaseContract(sdk, defaultGasLimit, defaultGasPrice, nil),
 	}
 }
 

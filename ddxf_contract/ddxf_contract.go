@@ -93,7 +93,13 @@ func (this *DDXFKit) BuyDtoken(buyer *ontology_go_sdk.Account, resourceId []byte
 func (this *DDXFKit) UseToken(resourceId []byte, buyer *ontology_go_sdk.Account,
 	tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, buyer, "useToken",
-		[]interface{}{resourceId, buyer.Address, tokenTemplate, n})
+		[]interface{}{resourceId, buyer.Address, tokenTemplate.ToBytes(), n})
+}
+
+func (this *DDXFKit) UseTokenByAgents(resource_id []byte, tokenOwner common.Address,
+	agent *ontology_go_sdk.Account, tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, agent, "useTokenByAgent",
+		[]interface{}{resource_id, tokenOwner, agent.Address, tokenTemplate.ToBytes(), n})
 }
 
 func (this *DDXFKit) BuyDtokens(buyer *ontology_go_sdk.Account,
@@ -125,23 +131,31 @@ func (this *DDXFKit) SetTokenAgents(resourceId []byte, account *ontology_go_sdk.
 func (this *DDXFKit) AddAgents(resourceId []byte, account *ontology_go_sdk.Account,
 	agents []common.Address, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "addAgents",
-		[]interface{}{resourceId, account.Address, agents, n})
+		[]interface{}{resourceId, account.Address, parseAddressArr(agents), n})
+}
+
+func parseAddressArr(addrs []common.Address) []interface{} {
+	agentArr := make([]interface{}, len(addrs))
+	for i := 0; i < len(addrs); i++ {
+		agentArr[i] = addrs[i]
+	}
+	return agentArr
 }
 
 func (this *DDXFKit) AddTokenAgents(resourceId []byte, account *ontology_go_sdk.Account,
 	agents []common.Address, tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "addTokenAgents",
-		[]interface{}{resourceId, account.Address, tokenTemplate.ToBytes(), agents, n})
+		[]interface{}{resourceId, account.Address, tokenTemplate.ToBytes(), parseAddressArr(agents), n})
 }
 
 func (this *DDXFKit) RemoveAgents(resourceId []byte, account *ontology_go_sdk.Account,
 	agents []common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "removeAgents",
-		[]interface{}{resourceId, account.Address, agents})
+		[]interface{}{resourceId, account.Address, parseAddressArr(agents)})
 }
 
 func (this *DDXFKit) RemoveTokenAgents(resourceId []byte, tokenTemplate TokenTemplate, account *ontology_go_sdk.Account,
 	agents []common.Address) (common.Uint256, error) {
-	return this.bc.Invoke(this.contractAddress, account, "removeAgents",
-		[]interface{}{resourceId, tokenTemplate.ToBytes(), account.Address, agents})
+	return this.bc.Invoke(this.contractAddress, account, "removeTokenAgents",
+		[]interface{}{resourceId, tokenTemplate.ToBytes(), account.Address, parseAddressArr(agents)})
 }

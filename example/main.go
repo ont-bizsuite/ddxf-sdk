@@ -19,6 +19,7 @@ var (
 	seller        *ontology_go_sdk.Account
 	buyer         *ontology_go_sdk.Account
 	agent         *ontology_go_sdk.Account
+	payer         *ontology_go_sdk.Account
 	gasPrice      = uint64(0)
 	tokenTemplate *ddxf_contract.TokenTemplate
 )
@@ -43,6 +44,7 @@ func main() {
 	seller, _ = wallet.GetAccountByAddress("Aejfo7ZX5PVpenRj23yChnyH64nf8T1zbu", pwd)
 	buyer, _ = wallet.GetAccountByAddress("AHhXa11suUgVLX1ZDFErqBd3gskKqLfa5N", pwd)
 	agent, _ = wallet.GetAccountByAddress("ANb3bf1b67WP2ZPh5HQt4rkrmphMJmMCMK", pwd)
+	payer, _ = wallet.GetAccountByAddress("AQCQ3Krh6qxeWKKRACNehA8kAATHxoQNWJ", pwd)
 
 	codeHex := common.ToHexString(code)
 	contractAddr := common.AddressFromVmCode(code)
@@ -65,8 +67,19 @@ func main() {
 	}
 	if true {
 		resourceIdBytes := []byte(strconv.Itoa(rand.Int()))
-		publish(sdk, resourceIdBytes)
-		buyDtoken(sdk, resourceIdBytes)
+		if err = publish(sdk, resourceIdBytes); err != nil {
+			fmt.Println("publish error: ", err)
+			return
+		}
+
+		if err = buyAndUseToken(sdk, resourceIdBytes); err != nil {
+			fmt.Println("buyAndUseToken error: ", err)
+			return
+		}
+		if err = buyDtoken(sdk, resourceIdBytes); err != nil {
+			fmt.Println("buyDtoken error: ", err)
+			return
+		}
 
 		if err = addAgents(sdk, resourceIdBytes); err != nil {
 			fmt.Println("addAgents error: ", err)
@@ -147,8 +160,17 @@ func useToken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 	}
 	return showNotify(sdk, "useToken", txHash.ToHexString())
 }
+
+func buyAndUseToken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefDDXFKit().BuyAndUseToken(buyer, payer, resourceIdBytes, 2)
+	if err != nil {
+		return err
+	}
+	return showNotify(sdk, "buyAndUseToken", txHash.ToHexString())
+}
+
 func buyDtoken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().BuyDtoken(buyer, resourceIdBytes, 2)
+	txHash, err := sdk.DefDDXFKit().BuyDtoken(buyer, payer, resourceIdBytes, 2)
 	if err != nil {
 		return err
 	}
@@ -167,7 +189,7 @@ func showNotify(sdk *ddxf_sdk.DdxfSdk, method, txHash string) error {
 	return nil
 }
 
-func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) {
+func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 	dataId := ""
 	tokenTemplate = &ddxf_contract.TokenTemplate{
 		DataID:     dataId,
@@ -183,7 +205,7 @@ func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) {
 	}
 	bs, err := ddxf.HashObject(itemMeta)
 	if err != nil {
-		return
+		return err
 	}
 	itemMetaHash, err := common.Uint256ParseFromBytes(bs[:])
 
@@ -225,15 +247,11 @@ func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) {
 	txHash, err := sdk.DefDDXFKit().Publish(seller, resourceIdBytes, ddo, item, sp)
 	if err != nil {
 		fmt.Printf("Publish error:%s\n", err)
-		return
+		return err
 	}
 	fmt.Println("publish txHash: ", txHash.ToHexString())
-	evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
-	if err != nil {
-		fmt.Printf("Publish error:%s\n", err)
-		return
-	}
-	fmt.Println("publish evt:", evt)
+
+	return showNotify(sdk, "publish", txHash.ToHexString())
 }
 
 func deployContract(sdk *ddxf_sdk.DdxfSdk, admin *ontology_go_sdk.Account, codeHex string) {

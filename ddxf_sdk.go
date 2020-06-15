@@ -24,17 +24,17 @@ const (
 
 const (
 	defaultGasPrice = 500
-	defaultGasLimit = 31200000
+	defaultGasLimit = 31600000
 )
 
 type DdxfSdk struct {
-	sdk                   *ontology_go_sdk.OntologySdk
-	bc                    *base_contract.BaseContract
-	rpc                   string
-	defaultDdxfContract   *ddxf_contract.DDXFKit
-	defaultDataIdContract *data_id_contract.DataIdKit
-	gasPrice              uint64
-	gasLimit              uint64
+	sdk          *ontology_go_sdk.OntologySdk
+	bc           *base_contract.BaseContract
+	rpc          string
+	defDDXFKit   *ddxf_contract.DDXFKit
+	defDataIdKit *data_id_contract.DataIdKit
+	gasPrice     uint64
+	gasLimit     uint64
 }
 
 func NewDdxfSdk(addr string) *DdxfSdk {
@@ -67,22 +67,22 @@ func (sdk *DdxfSdk) GetOntologySdk() *ontology_go_sdk.OntologySdk {
 	return sdk.sdk
 }
 
-func (sdk *DdxfSdk) DefaultDataIdContract() *data_id_contract.DataIdKit {
-	if sdk.defaultDataIdContract == nil {
+func (sdk *DdxfSdk) DefDataIdKit() *data_id_contract.DataIdKit {
+	if sdk.defDataIdKit == nil {
 		contractAddress, _ := common.AddressFromHexString(dataIdContractAddress)
-		sdk.defaultDataIdContract = data_id_contract.NewDataIdContractKit(contractAddress,
+		sdk.defDataIdKit = data_id_contract.NewDataIdContractKit(contractAddress,
 			sdk.bc)
 	}
-	return sdk.defaultDataIdContract
+	return sdk.defDataIdKit
 }
 
 func (sdk *DdxfSdk) DefDDXFKit() *ddxf_contract.DDXFKit {
-	if sdk.defaultDdxfContract == nil {
+	if sdk.defDDXFKit == nil {
 		contractAddress, _ := common.AddressFromHexString(dDXFContractAddress)
-		sdk.defaultDdxfContract = ddxf_contract.NewDDXFContractKit(contractAddress,
+		sdk.defDDXFKit = ddxf_contract.NewDDXFContractKit(contractAddress,
 			sdk.bc)
 	}
-	return sdk.defaultDdxfContract
+	return sdk.defDDXFKit
 }
 
 func (sdk *DdxfSdk) SetDDXFContractAddress(ddxf common.Address) {

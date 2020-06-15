@@ -74,7 +74,7 @@ func TestDTokenKit_GetDDXFContractAddr(t *testing.T) {
 
 //49c2dc97ee58b2292e55499e1122c579fc0690e3
 func TestDTokenKit_SetDDXFContractAddr(t *testing.T) {
-	addr, _ := common.AddressFromHexString("1061ddccf6af8d12beafba258c7af3eedc8d98c4")
+	addr, _ := common.AddressFromHexString("f0020843718912d5f25977ffd8ea7e4eb00601a1")
 	txHash, err := dTokenKit.SetDDXFContractAddr(admin, addr)
 	assert.Nil(t, err)
 

@@ -84,10 +84,36 @@ func (this *DDXFKit) getPublishProductInfo(resourceId []byte) (*ProductInfoOnCha
 	return p, nil
 }
 
-func (this *DDXFKit) BuyDtoken(buyer *ontology_go_sdk.Account, resourceId []byte,
+func (this *DDXFKit) BuyDtoken(buyer, payer *ontology_go_sdk.Account, resourceId []byte,
 	n int) (common.Uint256, error) {
-	return this.bc.Invoke(this.contractAddress, buyer, "buyDtoken",
-		[]interface{}{resourceId, n, buyer.Address})
+	tx, err := this.bc.BuildTx(this.contractAddress, buyer, "buyDtoken",
+		[]interface{}{resourceId, n, buyer.Address, payer.Address})
+	if err != nil {
+		return common.UINT256_EMPTY, err
+	}
+	if payer != nil && buyer.Address != payer.Address {
+		err = this.bc.GetOntologySdk().SignToTransaction(tx, payer)
+		if err != nil {
+			return common.UINT256_EMPTY, err
+		}
+	}
+	return this.bc.GetOntologySdk().SendTransaction(tx)
+}
+
+func (this *DDXFKit) BuyAndUseToken(buyer, payer *ontology_go_sdk.Account, resourceId []byte,
+	n int) (common.Uint256, error) {
+	tx, err := this.bc.BuildTx(this.contractAddress, buyer, "buyAndUseToken",
+		[]interface{}{resourceId, n, buyer.Address, payer.Address})
+	if err != nil {
+		return common.UINT256_EMPTY, err
+	}
+	if payer != nil && buyer.Address != payer.Address {
+		err = this.bc.GetOntologySdk().SignToTransaction(tx, payer)
+		if err != nil {
+			return common.UINT256_EMPTY, err
+		}
+	}
+	return this.bc.GetOntologySdk().SendTransaction(tx)
 }
 
 func (this *DDXFKit) UseToken(resourceId []byte, buyer *ontology_go_sdk.Account,

@@ -15,10 +15,12 @@ import (
 )
 
 var (
-	admin    *ontology_go_sdk.Account
-	seller   *ontology_go_sdk.Account
-	buyer    *ontology_go_sdk.Account
-	gasPrice = uint64(0)
+	admin         *ontology_go_sdk.Account
+	seller        *ontology_go_sdk.Account
+	buyer         *ontology_go_sdk.Account
+	agent         *ontology_go_sdk.Account
+	gasPrice      = uint64(0)
+	tokenTemplate *ddxf_contract.TokenTemplate
 )
 
 func main() {
@@ -40,6 +42,7 @@ func main() {
 	admin, _ = wallet.GetAccountByAddress("AYnhakv7kC9R5ppw65JoE2rt6xDzCjCTvD", pwd)
 	seller, _ = wallet.GetAccountByAddress("Aejfo7ZX5PVpenRj23yChnyH64nf8T1zbu", pwd)
 	buyer, _ = wallet.GetAccountByAddress("AHhXa11suUgVLX1ZDFErqBd3gskKqLfa5N", pwd)
+	agent, _ = wallet.GetAccountByAddress("ANb3bf1b67WP2ZPh5HQt4rkrmphMJmMCMK", pwd)
 
 	codeHex := common.ToHexString(code)
 	contractAddr := common.AddressFromVmCode(code)
@@ -63,13 +66,89 @@ func main() {
 	if true {
 		resourceIdBytes := []byte(strconv.Itoa(rand.Int()))
 		publish(sdk, resourceIdBytes)
-
 		buyDtoken(sdk, resourceIdBytes)
+
+		if err = addAgents(sdk, resourceIdBytes); err != nil {
+			fmt.Println("addAgents error: ", err)
+			return
+		}
+		if err = useTokenByAgent(sdk, resourceIdBytes); err != nil {
+			fmt.Println("useTokenByAgent error: ", err)
+			return
+		}
+		if err = removeAgents(sdk, resourceIdBytes); err != nil {
+			fmt.Println("removeAgents error: ", err)
+			return
+		}
+		if err = addTokenAgents(sdk, resourceIdBytes); err != nil {
+			fmt.Println("addTokenAgents error: ", err)
+			return
+		}
+		if err = removeTokenAgents(sdk, resourceIdBytes); err != nil {
+			fmt.Println("removeTokenAgents error: ", err)
+			return
+		}
+
+		err = useToken(sdk, resourceIdBytes)
+		if err != nil {
+			fmt.Println("useToken: %s", err)
+			return
+		}
 	}
 }
 
+func addTokenAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefDDXFKit().AddTokenAgents(resourceIdBytes, buyer,
+		[]common.Address{agent.Address}, *tokenTemplate, 1)
+	if err != nil {
+		return err
+	}
+	return showNotify(sdk, "addTokenAgents", txHash.ToHexString())
+}
+
+func removeTokenAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefDDXFKit().RemoveTokenAgents(resourceIdBytes, *tokenTemplate, buyer,
+		[]common.Address{agent.Address})
+	if err != nil {
+		return err
+	}
+	return showNotify(sdk, "removeTokenAgents", txHash.ToHexString())
+}
+
+func removeAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefDDXFKit().RemoveAgents(resourceIdBytes, buyer, []common.Address{agent.Address})
+	if err != nil {
+		return err
+	}
+	return showNotify(sdk, "removeAgents", txHash.ToHexString())
+}
+
+func useTokenByAgent(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefDDXFKit().UseTokenByAgents(resourceIdBytes, buyer.Address, agent, *tokenTemplate, 1)
+	if err != nil {
+		return err
+	}
+	return showNotify(sdk, "UseTokenByAgents", txHash.ToHexString())
+}
+
+func addAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefDDXFKit().AddAgents(resourceIdBytes, buyer,
+		[]common.Address{agent.Address}, 1)
+	if err != nil {
+		fmt.Println("AddAgents: %s", err)
+		return err
+	}
+	return showNotify(sdk, "addAgents", txHash.ToHexString())
+}
+func useToken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefDDXFKit().UseToken(resourceIdBytes, buyer, *tokenTemplate, 1)
+	if err != nil {
+		return err
+	}
+	return showNotify(sdk, "useToken", txHash.ToHexString())
+}
 func buyDtoken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().BuyDtoken(buyer, resourceIdBytes, 1)
+	txHash, err := sdk.DefDDXFKit().BuyDtoken(buyer, resourceIdBytes, 2)
 	if err != nil {
 		return err
 	}
@@ -77,19 +156,20 @@ func buyDtoken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 }
 
 func showNotify(sdk *ddxf_sdk.DdxfSdk, method, txHash string) error {
+	fmt.Printf("method: %s, txHash: %s\n", method, txHash)
 	evt, err := sdk.GetSmartCodeEvent(txHash)
 	if err != nil {
 		return err
 	}
 	for _, notify := range evt.Notify {
-		fmt.Printf("method: %s,buy dtoken evt: %v\n", method, notify)
+		fmt.Printf("method: %s,evt: %v\n", method, notify)
 	}
 	return nil
 }
 
 func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) {
 	dataId := ""
-	tokenTemplate := &ddxf_contract.TokenTemplate{
+	tokenTemplate = &ddxf_contract.TokenTemplate{
 		DataID:     dataId,
 		TokenHashs: []string{string(common.UINT256_EMPTY[:])},
 	}

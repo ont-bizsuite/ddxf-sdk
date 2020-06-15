@@ -45,7 +45,7 @@ func TestMain(m *testing.M) {
 	addr := common.AddressFromVmCode(code)
 	fmt.Printf("contract address: %s\n", addr.ToHexString())
 	//only need execute once
-	if true {
+	if false {
 		txHash, err := ontSdk.WasmVM.DeployWasmVMSmartContract(gasPrice, gasLimit, admin,
 			hex.EncodeToString(code), "", "", "", "", "")
 		if err != nil {
@@ -74,7 +74,7 @@ func TestDTokenKit_GetDDXFContractAddr(t *testing.T) {
 
 //49c2dc97ee58b2292e55499e1122c579fc0690e3
 func TestDTokenKit_SetDDXFContractAddr(t *testing.T) {
-	addr, _ := common.AddressFromHexString("26840dde038de198bd4cd943ea1fc5389b211c7c")
+	addr, _ := common.AddressFromHexString("1061ddccf6af8d12beafba258c7af3eedc8d98c4")
 	txHash, err := dTokenKit.SetDDXFContractAddr(admin, addr)
 	assert.Nil(t, err)
 

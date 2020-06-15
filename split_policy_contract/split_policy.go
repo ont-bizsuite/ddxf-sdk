@@ -37,10 +37,22 @@ func (this *SplitPolicyKit) GetRegisterParam(key []byte) (*SplitPolicyRegisterPa
 	if err != nil {
 		return nil, err
 	}
+
 	spp := &SplitPolicyRegisterParam{}
 	err = spp.FromBytes(data)
 	if err != nil {
 		return nil, err
 	}
 	return spp, nil
+}
+
+func (this *SplitPolicyKit) Withdraw(key []byte, signer *ontology_go_sdk.Account) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, signer, "withdraw",
+		[]interface{}{key, signer.Address})
+}
+
+func (this *SplitPolicyKit) TransferAndWithdraw(from *ontology_go_sdk.Account, key []byte,
+	amt int) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, from, "transferWithdraw",
+		[]interface{}{from.Address, key, amt})
 }

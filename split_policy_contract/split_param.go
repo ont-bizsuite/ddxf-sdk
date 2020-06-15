@@ -24,13 +24,15 @@ const (
 )
 
 type AddrAmt struct {
-	To      common.Address
-	Percent uint32
+	To          common.Address
+	Percent     uint32
+	HasWithdraw bool
 }
 
 func (this *AddrAmt) Serialize(sink *common.ZeroCopySink) {
 	sink.WriteAddress(this.To)
 	sink.WriteUint32(this.Percent)
+	sink.WriteBool(this.HasWithdraw)
 }
 func (this *AddrAmt) Deserialize(source *common.ZeroCopySource) error {
 	addr, eof := source.NextAddress()
@@ -41,8 +43,13 @@ func (this *AddrAmt) Deserialize(source *common.ZeroCopySource) error {
 	if eof {
 		return fmt.Errorf("[AddrAmt] read percent failed, eof: %v", eof)
 	}
+	data, irregular, eof := source.NextBool()
+	if irregular || eof {
+		return fmt.Errorf("[AddrAmt] read hasWithdraw failed, irregular:%v, eof: %v", irregular, eof)
+	}
 	this.To = addr
 	this.Percent = p
+	this.HasWithdraw = data
 	return nil
 }
 
@@ -76,13 +83,16 @@ func (this *SplitPolicyRegisterParam) Deserialize(source *common.ZeroCopySource)
 	if irregular || eof {
 		return fmt.Errorf("read AddrAmts length failed,irregular: %v,eof: %v", irregular, eof)
 	}
-	aa := make([]*AddrAmt, l)
+	aas := make([]*AddrAmt, l)
 	for i := 0; i < int(l); i++ {
-		err := aa[i].Deserialize(source)
+		aa := &AddrAmt{}
+		err := aa.Deserialize(source)
 		if err != nil {
 			return err
 		}
+		aas[i] = aa
 	}
+	this.AddrAmts = aas
 	ty, eof := source.NextByte()
 	if eof {
 		return fmt.Errorf("[SplitPolicyRegisterParam] read TokenTy failed, eof: %v", eof)

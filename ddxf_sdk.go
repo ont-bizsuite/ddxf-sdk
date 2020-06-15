@@ -17,13 +17,14 @@ const (
 )
 
 const (
-	TestNet = "http://dappnode1.ont.io:20336"
-	MainNet = "http://polaris1.ont.io:20336"
+	MainNet  = "http://dappnode1.ont.io:20336"
+	TestNet  = "http://polaris1.ont.io:20336"
+	LocalNet = "http://127.0.0.1:20336"
 )
 
 const (
 	defaultGasPrice = 500
-	defaultGasLimit = 20000000
+	defaultGasLimit = 31200000
 )
 
 type DdxfSdk struct {
@@ -32,6 +33,8 @@ type DdxfSdk struct {
 	rpc                   string
 	defaultDdxfContract   *ddxf_contract.DDXFKit
 	defaultDataIdContract *data_id_contract.DataIdKit
+	gasPrice              uint64
+	gasLimit              uint64
 }
 
 func NewDdxfSdk(addr string) *DdxfSdk {
@@ -40,6 +43,8 @@ func NewDdxfSdk(addr string) *DdxfSdk {
 	return &DdxfSdk{
 		sdk: sdk,
 		rpc: addr,
+		gasPrice:defaultGasPrice,
+		gasLimit:defaultGasLimit,
 		bc:  base_contract.NewBaseContract(sdk, defaultGasLimit, defaultGasPrice, nil),
 	}
 }
@@ -49,10 +54,12 @@ func (sdk *DdxfSdk) SetPayer(payer *ontology_go_sdk.Account) {
 }
 
 func (sdk *DdxfSdk) SetGasLimit(gasLimit uint64) {
+	sdk.gasLimit = gasLimit
 	sdk.bc.SetGasLimit(gasLimit)
 }
 
 func (sdk *DdxfSdk) SetGasPrice(gasPrice uint64) {
+	sdk.gasPrice = gasPrice
 	sdk.bc.SetGasPrice(gasPrice)
 }
 
@@ -69,7 +76,7 @@ func (sdk *DdxfSdk) DefaultDataIdContract() *data_id_contract.DataIdKit {
 	return sdk.defaultDataIdContract
 }
 
-func (sdk *DdxfSdk) DefaultDDXFContract() *ddxf_contract.DDXFKit {
+func (sdk *DdxfSdk) DefDDXFKit() *ddxf_contract.DDXFKit {
 	if sdk.defaultDdxfContract == nil {
 		contractAddress, _ := common.AddressFromHexString(dDXFContractAddress)
 		sdk.defaultDdxfContract = ddxf_contract.NewDDXFContractKit(contractAddress,
@@ -79,7 +86,7 @@ func (sdk *DdxfSdk) DefaultDDXFContract() *ddxf_contract.DDXFKit {
 }
 
 func (sdk *DdxfSdk) SetDDXFContractAddress(ddxf common.Address) {
-	sdk.DefaultDDXFContract()
+	sdk.DefDDXFKit().SetContractAddress(ddxf)
 }
 
 func (sdk *DdxfSdk) GetSmartCodeEvent(txHash string) (*common2.SmartContactEvent, error) {
@@ -99,9 +106,8 @@ func (sdk *DdxfSdk) GetSmartCodeEvent(txHash string) (*common2.SmartContactEvent
 }
 
 func (this *DdxfSdk) DeployContract(signer *ontology_go_sdk.Account, code,
-	name, version, author, email,
-	desc string) (common.Uint256, error) {
-	return this.sdk.WasmVM.DeployWasmVMSmartContract(defaultGasLimit*2,
-		defaultGasPrice, signer, code, name,
+	name, version, author, email, desc string) (common.Uint256, error) {
+	return this.sdk.WasmVM.DeployWasmVMSmartContract(this.gasPrice,
+		this.gasLimit, signer, code, name,
 		version, author, email, desc)
 }

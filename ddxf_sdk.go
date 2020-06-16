@@ -2,9 +2,9 @@ package ddxf_sdk
 
 import (
 	"fmt"
-	"github.com/ontio/ddxf-sdk/base_contract"
-	"github.com/ontio/ddxf-sdk/data_id_contract"
-	"github.com/ontio/ddxf-sdk/ddxf_contract"
+	"github.com/ont-bizsuite/ddxf-sdk/base_contract"
+	"github.com/ont-bizsuite/ddxf-sdk/data_id_contract"
+	"github.com/ont-bizsuite/ddxf-sdk/ddxf_contract"
 	"github.com/ontio/ontology-go-sdk"
 	common2 "github.com/ontio/ontology-go-sdk/common"
 	"github.com/ontio/ontology/common"

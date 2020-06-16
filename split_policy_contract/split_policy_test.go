@@ -5,7 +5,6 @@ import (
 
 	"encoding/hex"
 	"fmt"
-	"github.com/ontio/ddxf-sdk/base_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
 	"github.com/stretchr/testify/assert"
@@ -13,6 +12,7 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+	"github.com/ont-bizsuite/ddxf-sdk/base_contract"
 )
 
 var (

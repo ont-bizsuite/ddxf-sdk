@@ -1,9 +1,9 @@
 package data_id_contract
 
 import (
-	"github.com/ontio/ddxf-sdk/base_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
+	"github.com/ont-bizsuite/ddxf-sdk/base_contract"
 )
 
 type DataIdKit struct {

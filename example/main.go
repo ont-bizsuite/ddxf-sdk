@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/ontio/ddxf-sdk"
-	"github.com/ontio/ddxf-sdk/ddxf_contract"
-	"github.com/ontio/ddxf-sdk/split_policy_contract"
+	"github.com/ont-bizsuite/ddxf-sdk"
+	"github.com/ont-bizsuite/ddxf-sdk/ddxf_contract"
+	"github.com/ont-bizsuite/ddxf-sdk/split_policy_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
 	"github.com/zhiqiangxu/ddxf"

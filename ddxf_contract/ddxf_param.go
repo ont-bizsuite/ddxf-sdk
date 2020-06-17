@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ontio/ontology/common"
 	"io"
+	"github.com/ont-bizsuite/ddxf-sdk/split_policy_contract"
 )
 
 type DataMetaInfo struct {
@@ -285,13 +286,13 @@ func (this *ResourceDDO) ToBytes() []byte {
 
 type Fee struct {
 	ContractAddr common.Address
-	ContractType byte
+	ContractType split_policy_contract.TokenType
 	Count        uint64
 }
 
 func (this *Fee) Serialize(sink *common.ZeroCopySink) {
 	sink.WriteAddress(this.ContractAddr)
-	sink.WriteByte(this.ContractType)
+	sink.WriteByte(byte(this.ContractType))
 	sink.WriteUint64(this.Count)
 }
 func (this *Fee) Deserialize(source *common.ZeroCopySource) error {
@@ -300,10 +301,11 @@ func (this *Fee) Deserialize(source *common.ZeroCopySource) error {
 	if eof {
 		return io.ErrUnexpectedEOF
 	}
-	this.ContractType, eof = source.NextByte()
+	ty, eof := source.NextByte()
 	if eof {
 		return io.ErrUnexpectedEOF
 	}
+	this.ContractType = split_policy_contract.TokenType(ty)
 	this.Count, eof = source.NextUint64()
 	if eof {
 		return io.ErrUnexpectedEOF

@@ -8,6 +8,7 @@ import (
 	"github.com/ontio/ontology-go-sdk"
 	common2 "github.com/ontio/ontology-go-sdk/common"
 	"github.com/ontio/ontology/common"
+	"github.com/ontio/ontology/core/types"
 	"time"
 )
 
@@ -35,6 +36,7 @@ type DdxfSdk struct {
 	defDataIdKit *data_id_contract.DataIdKit
 	gasPrice     uint64
 	gasLimit     uint64
+	payer        *ontology_go_sdk.Account
 }
 
 func NewDdxfSdk(addr string) *DdxfSdk {
@@ -50,6 +52,7 @@ func NewDdxfSdk(addr string) *DdxfSdk {
 }
 
 func (sdk *DdxfSdk) SetPayer(payer *ontology_go_sdk.Account) {
+	sdk.payer = payer
 	sdk.bc.SetPayer(payer)
 }
 
@@ -65,6 +68,22 @@ func (sdk *DdxfSdk) SetGasPrice(gasPrice uint64) {
 
 func (sdk *DdxfSdk) GetOntologySdk() *ontology_go_sdk.OntologySdk {
 	return sdk.sdk
+}
+func (sdk *DdxfSdk) SignTx(tx *types.MutableTransaction, signer *ontology_go_sdk.Account) (*types.MutableTransaction, error) {
+	if sdk.payer != nil {
+		sdk.sdk.SetPayer(tx, sdk.payer.Address)
+		err := sdk.sdk.SignToTransaction(tx, sdk.payer)
+		if err != nil {
+			return nil, fmt.Errorf("payer sign tx error: %s", err)
+		}
+	}
+	if sdk.payer != signer {
+		err := sdk.sdk.SignToTransaction(tx, signer)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return tx, nil
 }
 
 func (sdk *DdxfSdk) DefDataIdKit() *data_id_contract.DataIdKit {

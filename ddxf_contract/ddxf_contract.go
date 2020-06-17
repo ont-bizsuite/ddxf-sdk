@@ -123,6 +123,15 @@ func (this *DDXFKit) Freeze(manager *ontology_go_sdk.Account,
 	return this.bc.GetOntologySdk().SendTransaction(tx)
 }
 
+func (this *DDXFKit) BuildFreezeTx(resourceId []byte) (*types.MutableTransaction, error) {
+	tx, err := this.bc.BuildTx(this.contractAddress, "freeze",
+		[]interface{}{resourceId})
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
+}
+
 func (this *DDXFKit) BuyDtoken(buyer, payer *ontology_go_sdk.Account, resourceId []byte,
 	n int) (common.Uint256, error) {
 	if payer == nil {

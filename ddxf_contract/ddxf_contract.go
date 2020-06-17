@@ -68,10 +68,10 @@ func (this *DDXFKit) Publish(seller *ontology_go_sdk.Account, resourceId []byte,
 		[]interface{}{resourceId, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
 }
 
-func (this *DDXFKit) FreezePublish(seller *ontology_go_sdk.Account, resourceIdOld, resourceIdNew []byte,
+func (this *DDXFKit) FreezeAndPublish(seller *ontology_go_sdk.Account, resourceIdOld, resourceIdNew []byte,
 	ddo ResourceDDO, item DTokenItem,
 	splitPolicyParam split_policy_contract.SplitPolicyRegisterParam) (common.Uint256, error) {
-	return this.bc.Invoke(this.contractAddress, seller, "freezePublish",
+	return this.bc.Invoke(this.contractAddress, seller, "freezeAndPublish",
 		[]interface{}{resourceIdOld, resourceIdNew, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
 }
 

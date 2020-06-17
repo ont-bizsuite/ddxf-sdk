@@ -180,6 +180,16 @@ func (this *DDXFKit) BuyAndUseToken(buyer, payer *ontology_go_sdk.Account, resou
 	return this.bc.GetOntologySdk().SendTransaction(tx)
 }
 
+func (this *DDXFKit) BuildBuyAndUseTokenTx(buyer, payer common.Address, resourceId []byte,
+	n int, tokenTemplate TokenTemplate) (*types.MutableTransaction, error) {
+	tx, err := this.bc.BuildTx(this.contractAddress, "buyAndUseToken",
+		[]interface{}{resourceId, n, buyer, payer, tokenTemplate.ToBytes()})
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
+}
+
 func (this *DDXFKit) UseToken(resourceId []byte, buyer *ontology_go_sdk.Account,
 	tokenTemplate TokenTemplate, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, buyer, "useToken",

@@ -1,7 +1,6 @@
 package base_contract
 
 import (
-	"fmt"
 	"github.com/ontio/ontology-go-sdk"
 	common2 "github.com/ontio/ontology-go-sdk/common"
 	"github.com/ontio/ontology/common"
@@ -57,23 +56,10 @@ func (this *BaseContract) Invoke(contractAddr common.Address, signer *ontology_g
 	}
 	return txhash, nil
 }
-func (this *BaseContract) BuildTx(contractAddr common.Address, signer *ontology_go_sdk.Account, method string, param []interface{}) (*types.MutableTransaction, error) {
+func (this *BaseContract) BuildTx(contractAddr common.Address, method string, param []interface{}) (*types.MutableTransaction, error) {
 	tx, err := this.sdk.WasmVM.NewInvokeWasmVmTransaction(this.gasPrice, this.gasLimit, contractAddr, method, param)
 	if err != nil {
 		return nil, err
-	}
-	if this.payer != nil {
-		this.sdk.SetPayer(tx, this.payer.Address)
-		err = this.sdk.SignToTransaction(tx, this.payer)
-		if err != nil {
-			return nil, fmt.Errorf("payer sign tx error: %s", err)
-		}
-	}
-	if this.payer != signer {
-		err = this.sdk.SignToTransaction(tx, signer)
-		if err != nil {
-			return nil, err
-		}
 	}
 	return tx, nil
 }

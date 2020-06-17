@@ -78,7 +78,7 @@ func (this *DDXFKit) FreezeAndPublish(seller *ontology_go_sdk.Account, resourceI
 func (this *DDXFKit) BuildFreezePublishTx(manager common.Address, resourceIdOld, resourceIdNew []byte,
 	ddo ResourceDDO, item DTokenItem,
 	splitPolicyParam split_policy_contract.SplitPolicyRegisterParam) (*types.MutableTransaction, error) {
-	return this.bc.BuildTx(this.contractAddress, "freezePublish", []interface{}{
+	return this.bc.BuildTx(this.contractAddress, "freezeAndPublish", []interface{}{
 		resourceIdOld, resourceIdNew, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes(),
 	})
 }

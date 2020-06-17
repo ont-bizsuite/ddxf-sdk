@@ -86,6 +86,10 @@ func (sdk *DdxfSdk) SignTx(tx *types.MutableTransaction, signer *ontology_go_sdk
 	return tx, nil
 }
 
+func (sdk *DdxfSdk) SendTx(tx *types.MutableTransaction) (common.Uint256, error) {
+	return sdk.sdk.SendTransaction(tx)
+}
+
 func (sdk *DdxfSdk) DefDataIdKit() *data_id_contract.DataIdKit {
 	if sdk.defDataIdKit == nil {
 		contractAddress, _ := common.AddressFromHexString(dataIdContractAddress)

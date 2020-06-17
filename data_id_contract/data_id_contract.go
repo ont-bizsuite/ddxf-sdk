@@ -4,6 +4,7 @@ import (
 	"github.com/ont-bizsuite/ddxf-sdk/base_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
+	"github.com/ontio/ontology/core/types"
 )
 
 type DataIdKit struct {
@@ -33,11 +34,19 @@ func (this *DataIdKit) RegisterDataIdInfo(info DataIdInfo,
 func (this *DataIdKit) RegisterDataIdInfoArray(info []DataIdInfo,
 	seller *ontology_go_sdk.Account) (common.Uint256, error) {
 	param := make([]interface{}, len(info))
-	for i:=0;i<len(info);i++ {
+	for i := 0; i < len(info); i++ {
 		param[i] = info[i].ToBytes()
 	}
 	return this.bc.Invoke(this.contractAddress, seller, "registerDataIdArray",
 		[]interface{}{param})
+}
+
+func (this *DataIdKit) BuildRegisterDataIdInfoArrayTx(info []DataIdInfo) (*types.MutableTransaction, error) {
+	param := make([]interface{}, len(info))
+	for i := 0; i < len(info); i++ {
+		param[i] = info[i].ToBytes()
+	}
+	return this.bc.BuildTx(this.contractAddress, "registerDataIdArray", []interface{}{param})
 }
 
 func (this *DataIdKit) GetDataIdInfo(dataId string) (*DataIdInfo, error) {

@@ -30,6 +30,16 @@ func (this *DataIdKit) RegisterDataIdInfo(info DataIdInfo,
 		[]interface{}{info.ToBytes()})
 }
 
+func (this *DataIdKit) RegisterDataIdInfoArray(info []DataIdInfo,
+	seller *ontology_go_sdk.Account) (common.Uint256, error) {
+	param := make([]interface{}, len(info))
+	for i:=0;i<len(info);i++ {
+		param[i] = info[i].ToBytes()
+	}
+	return this.bc.Invoke(this.contractAddress, seller, "registerDataIdArray",
+		[]interface{}{param})
+}
+
 func (this *DataIdKit) GetDataIdInfo(dataId string) (*DataIdInfo, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "getDataIdInfo",
 		[]interface{}{dataId})

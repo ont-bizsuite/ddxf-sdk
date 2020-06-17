@@ -3,9 +3,9 @@ package ddxf_contract
 import (
 	"errors"
 	"fmt"
+	"github.com/ont-bizsuite/ddxf-sdk/split_policy_contract"
 	"github.com/ontio/ontology/common"
 	"io"
-	"github.com/ont-bizsuite/ddxf-sdk/split_policy_contract"
 )
 
 type DataMetaInfo struct {

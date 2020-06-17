@@ -68,10 +68,25 @@ func (this *DDXFKit) Publish(seller *ontology_go_sdk.Account, resourceId []byte,
 		[]interface{}{resourceId, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
 }
 
+func (this *DDXFKit) FreezePublish(seller *ontology_go_sdk.Account, resourceIdOld, resourceIdNew []byte,
+	ddo ResourceDDO, item DTokenItem,
+	splitPolicyParam split_policy_contract.SplitPolicyRegisterParam) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, seller, "freezePublish",
+		[]interface{}{resourceIdOld, resourceIdNew, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
+}
+
+func (this *DDXFKit) BuildFreezePublishTx(manager common.Address, resourceIdOld, resourceIdNew []byte,
+	ddo ResourceDDO, item DTokenItem,
+	splitPolicyParam split_policy_contract.SplitPolicyRegisterParam) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "freezePublish", []interface{}{
+		resourceIdOld, resourceIdNew, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes(),
+	})
+}
+
 func (this *DDXFKit) BuildPublishTx(resourceId []byte,
 	ddo ResourceDDO, item DTokenItem,
 	splitPolicyParam split_policy_contract.SplitPolicyRegisterParam) (*types.MutableTransaction, error) {
-	tx, err := this.bc.BuildTx(this.contractAddress,"dtokenSellerPublish",
+	tx, err := this.bc.BuildTx(this.contractAddress, "dtokenSellerPublish",
 		[]interface{}{resourceId, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
 	return tx, err
 }
@@ -96,7 +111,7 @@ func (this *DDXFKit) getPublishProductInfo(resourceId []byte) (*ProductInfoOnCha
 
 func (this *DDXFKit) Freeze(manager *ontology_go_sdk.Account,
 	resourceId []byte) (common.Uint256, error) {
-	tx, err := this.bc.BuildTx(this.contractAddress, manager, "buyDtoken",
+	tx, err := this.bc.BuildTx(this.contractAddress, "freeze",
 		[]interface{}{resourceId})
 	if err != nil {
 		return common.UINT256_EMPTY, err
@@ -113,7 +128,7 @@ func (this *DDXFKit) BuyDtoken(buyer, payer *ontology_go_sdk.Account, resourceId
 	if payer == nil {
 		payer = buyer
 	}
-	tx, err := this.bc.BuildTx(this.contractAddress, buyer, "buyDtoken",
+	tx, err := this.bc.BuildTx(this.contractAddress, "buyDtoken",
 		[]interface{}{resourceId, n, buyer.Address, payer.Address})
 	if err != nil {
 		return common.UINT256_EMPTY, err
@@ -132,7 +147,7 @@ func (this *DDXFKit) BuyDtokenReward(buyer, payer *ontology_go_sdk.Account, reso
 	if payer == nil {
 		payer = buyer
 	}
-	tx, err := this.bc.BuildTx(this.contractAddress, buyer, "buyDtoken",
+	tx, err := this.bc.BuildTx(this.contractAddress, "buyDtoken",
 		[]interface{}{resourceId, n, buyer.Address, payer.Address, unitPrice})
 	if err != nil {
 		return common.UINT256_EMPTY, err
@@ -151,8 +166,8 @@ func (this *DDXFKit) BuyAndUseToken(buyer, payer *ontology_go_sdk.Account, resou
 	if payer == nil {
 		payer = buyer
 	}
-	tx, err := this.bc.BuildTx(this.contractAddress, buyer, "buyAndUseToken",
-		[]interface{}{resourceId, n, buyer.Address, payer.Address,tokenTemplate.ToBytes()})
+	tx, err := this.bc.BuildTx(this.contractAddress, "buyAndUseToken",
+		[]interface{}{resourceId, n, buyer.Address, payer.Address, tokenTemplate.ToBytes()})
 	if err != nil {
 		return common.UINT256_EMPTY, err
 	}

@@ -20,12 +20,15 @@ var (
 	buyer         *ontology_go_sdk.Account
 	agent         *ontology_go_sdk.Account
 	payer         *ontology_go_sdk.Account
-	gasPrice      = uint64(500)
+	gasPrice      = uint64(0)
 	tokenTemplate *market_place_contract.TokenTemplate
 )
+
 //3f2c66242810aacc4d033758c03f182fbf31df84  split
 func main() {
-	sdk := ddxf_sdk.NewDdxfSdk(ddxf_sdk.TestNet)
+	testNet := "http://106.75.224.136:20336"
+	sdk := ddxf_sdk.NewDdxfSdk(testNet)
+	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
 	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
@@ -60,6 +63,7 @@ func main() {
 	if false {
 		dtoken, _ := common.AddressFromHexString("466b94488bf2ad1b1eec0ae7e49e40708e71a35d")
 		split, _ := common.AddressFromHexString("3f2c66242810aacc4d033758c03f182fbf31df84")
+		sdk.SetGasPrice(0)
 		txHash, err := sdk.DefMpKit().Init(seller, dtoken, split)
 		if err != nil {
 			fmt.Println("Init failed: ", err)
@@ -70,7 +74,8 @@ func main() {
 	}
 
 	if false {
-		contractAddr, _ := common.AddressFromHexString("f92bc4c42f9c5d10664901b77de3ef87f9e0dd61")
+		sdk.SetGasPrice(0)
+		contractAddr, _ := common.AddressFromHexString("9d0203fc1c1a5019c53fdf62ae3232f5a72f5d80")
 		txHash, err := sdk.DefDTokenKit().SetMpContractAddr(seller, contractAddr)
 		if err != nil {
 			fmt.Println(err)
@@ -97,7 +102,7 @@ func main() {
 			fmt.Println("publish error: ", err)
 			return
 		}
-
+		return
 		if err := delete(sdk, resourceIdBytes); err != nil {
 			fmt.Println("delete error: ", err)
 			return

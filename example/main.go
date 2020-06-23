@@ -20,14 +20,14 @@ var (
 	buyer         *ontology_go_sdk.Account
 	agent         *ontology_go_sdk.Account
 	payer         *ontology_go_sdk.Account
-	gasPrice      = uint64(0)
+	gasPrice      = uint64(500)
 	tokenTemplate *market_place_contract.TokenTemplate
 )
-
+//3f2c66242810aacc4d033758c03f182fbf31df84  split
 func main() {
-	sdk := ddxf_sdk.NewDdxfSdk(ddxf_sdk.LocalNet)
+	sdk := ddxf_sdk.NewDdxfSdk(ddxf_sdk.TestNet)
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
+	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
@@ -58,7 +58,7 @@ func main() {
 	}
 	sdk.SetMpContractAddress(contractAddr)
 	if false {
-		dtoken, _ := common.AddressFromHexString("d80184492a900e554c5c17f0c51c27ea1dd363f6")
+		dtoken, _ := common.AddressFromHexString("466b94488bf2ad1b1eec0ae7e49e40708e71a35d")
 		split, _ := common.AddressFromHexString("3f2c66242810aacc4d033758c03f182fbf31df84")
 		txHash, err := sdk.DefMpKit().Init(seller, dtoken, split)
 		if err != nil {

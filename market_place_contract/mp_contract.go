@@ -68,6 +68,16 @@ func (this *MpKit) Publish(seller *ontology_go_sdk.Account, resourceId []byte, d
 		[]interface{}{resourceId, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
 }
 
+func (this *MpKit) Update(seller *ontology_go_sdk.Account, resourceId []byte, ddo ResourceDDO, item DTokenItem,
+	splitPolicyParam split_policy_contract.SplitPolicyRegisterParam) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, seller, "update",
+		[]interface{}{resourceId, ddo.ToBytes(), item.ToBytes(), splitPolicyParam.ToBytes()})
+}
+func (this *MpKit) Delete(seller *ontology_go_sdk.Account, resourceId []byte) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, seller, "delete",
+		[]interface{}{resourceId})
+}
+
 func (this *MpKit) FreezeAndPublish(seller *ontology_go_sdk.Account, resourceIdOld, resourceIdNew []byte,
 	ddo ResourceDDO, item DTokenItem,
 	splitPolicyParam split_policy_contract.SplitPolicyRegisterParam) (common.Uint256, error) {

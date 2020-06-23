@@ -29,7 +29,7 @@ func main() {
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
-	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
 	if err != nil {
 		fmt.Printf("error in ReadFile:%s\n", err)
@@ -52,7 +52,7 @@ func main() {
 	contractAddr := common.AddressFromVmCode(code)
 	fmt.Printf("contractAddr:%s, contractAddr:%s\n", contractAddr.ToBase58(), contractAddr.ToHexString())
 	//return
-	if true {
+	if false {
 		deployContract(sdk, admin, codeHex)
 		return
 	}
@@ -95,6 +95,16 @@ func main() {
 
 		if err = publish(sdk, resourceIdBytes); err != nil {
 			fmt.Println("publish error: ", err)
+			return
+		}
+
+		if err := delete(sdk, resourceIdBytes); err != nil {
+			fmt.Println("delete error: ", err)
+			return
+		}
+
+		if err := update(sdk, resourceIdBytes); err != nil {
+			fmt.Println("update error: ", err)
 			return
 		}
 
@@ -217,6 +227,74 @@ func showNotify(sdk *ddxf_sdk.DdxfSdk, method, txHash string) error {
 		fmt.Printf("method: %s,evt: %v\n", method, notify)
 	}
 	return nil
+}
+
+func delete(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefMpKit().Delete(seller, resourceIdBytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println(evt)
+	return nil
+}
+func update(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	itemMeta := map[string]interface{}{
+		"key": "value",
+	}
+	bs, err := ddxf.HashObject(itemMeta)
+	if err != nil {
+		return err
+	}
+	itemMetaHash, err := common.Uint256ParseFromBytes(bs[:])
+
+	ddo := market_place_contract.ResourceDDO{
+		Manager:      seller.Address,       // data owner id
+		ItemMetaHash: itemMetaHash,         // required if len(Templates) > 1
+		DTC:          common.ADDRESS_EMPTY, // can be empty
+		MP:           common.ADDRESS_EMPTY, // can be empty
+		Split:        common.ADDRESS_EMPTY,
+	}
+
+	item := market_place_contract.DTokenItem{
+		Fee: market_place_contract.Fee{
+			ContractType: 0,
+			Count:        1,
+		},
+		ExpiredDate: uint64(time.Now().Unix()) + 10000,
+		Stocks:      10000,
+		Templates:   []*market_place_contract.TokenTemplate{tokenTemplate},
+	}
+
+	sp := split_policy_contract.SplitPolicyRegisterParam{
+		AddrAmts: []*split_policy_contract.AddrAmt{
+			&split_policy_contract.AddrAmt{
+				To:          seller.Address,
+				Percent:     5000,
+				HasWithdraw: false,
+			},
+			&split_policy_contract.AddrAmt{
+				To:          admin.Address,
+				Percent:     5000,
+				HasWithdraw: false,
+			},
+		},
+		TokenTy: split_policy_contract.ONG,
+	}
+
+	txHash, err := sdk.DefMpKit().Update(seller, resourceIdBytes, ddo, item, sp)
+	if err != nil {
+		fmt.Printf("Publish error:%s\n", err)
+		return err
+	}
+	fmt.Println("publish txHash: ", txHash.ToHexString())
+
+	return showNotify(sdk, "update", txHash.ToHexString())
 }
 
 func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {

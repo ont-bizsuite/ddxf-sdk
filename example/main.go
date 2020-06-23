@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ont-bizsuite/ddxf-sdk"
-	"github.com/ont-bizsuite/ddxf-sdk/ddxf_contract"
+	"github.com/ont-bizsuite/ddxf-sdk/market_place_contract"
 	"github.com/ont-bizsuite/ddxf-sdk/split_policy_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
@@ -21,13 +21,15 @@ var (
 	agent         *ontology_go_sdk.Account
 	payer         *ontology_go_sdk.Account
 	gasPrice      = uint64(0)
-	tokenTemplate *ddxf_contract.TokenTemplate
+	tokenTemplate *market_place_contract.TokenTemplate
 )
 
 func main() {
 	sdk := ddxf_sdk.NewDdxfSdk(ddxf_sdk.LocalNet)
-	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/ddxf.wasm"
+	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
 	if err != nil {
 		fmt.Printf("error in ReadFile:%s\n", err)
@@ -49,15 +51,16 @@ func main() {
 	codeHex := common.ToHexString(code)
 	contractAddr := common.AddressFromVmCode(code)
 	fmt.Printf("contractAddr:%s, contractAddr:%s\n", contractAddr.ToBase58(), contractAddr.ToHexString())
+	//return
 	if false {
 		deployContract(sdk, admin, codeHex)
 		return
 	}
-	sdk.SetDDXFContractAddress(contractAddr)
+	sdk.SetMpContractAddress(contractAddr)
 	if false {
-		dtoken, _ := common.AddressFromHexString("49c2dc97ee58b2292e55499e1122c579fc0690e3")
-		split, _ := common.AddressFromHexString("d1c175f1e485c4af5d3fb8906e850a5d569c4c48")
-		txHash, err := sdk.DefDDXFKit().Init(admin, dtoken, split)
+		dtoken, _ := common.AddressFromHexString("d80184492a900e554c5c17f0c51c27ea1dd363f6")
+		split, _ := common.AddressFromHexString("3f2c66242810aacc4d033758c03f182fbf31df84")
+		txHash, err := sdk.DefMpKit().Init(seller, dtoken, split)
 		if err != nil {
 			fmt.Println("Init failed: ", err)
 			return
@@ -65,44 +68,81 @@ func main() {
 		showNotify(sdk, "init", txHash.ToHexString())
 		return
 	}
+
+	if false {
+		contractAddr, _ := common.AddressFromHexString("f92bc4c42f9c5d10664901b77de3ef87f9e0dd61")
+		txHash, err := sdk.DefDTokenKit().SetMpContractAddr(seller, contractAddr)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(evt)
+		return
+	}
+
 	if true {
 		resourceIdBytes := []byte(strconv.Itoa(rand.Int()))
+		dataId := ""
+		tokenTemplate = &market_place_contract.TokenTemplate{
+			DataID:     dataId,
+			TokenHashs: []string{string(common.UINT256_EMPTY[:])},
+		}
+
 		if err = publish(sdk, resourceIdBytes); err != nil {
 			fmt.Println("publish error: ", err)
 			return
 		}
 
-		if err = buyAndUseToken(sdk, resourceIdBytes); err != nil {
-			fmt.Println("buyAndUseToken error: ", err)
+		if err := delete(sdk, resourceIdBytes); err != nil {
+			fmt.Println("delete error: ", err)
 			return
 		}
+
+		if err := update(sdk, resourceIdBytes); err != nil {
+			fmt.Println("update error: ", err)
+			return
+		}
+
+		//if err = buyAndUseToken(sdk, resourceIdBytes); err != nil {
+		//	fmt.Println("buyAndUseToken error: ", err)
+		//	return
+		//}
+
 		if err = buyDtoken(sdk, resourceIdBytes); err != nil {
 			fmt.Println("buyDtoken error: ", err)
 			return
 		}
 
-		if err = addAgents(sdk, resourceIdBytes); err != nil {
+		if err = addAgents(sdk); err != nil {
 			fmt.Println("addAgents error: ", err)
 			return
 		}
-		if err = useTokenByAgent(sdk, resourceIdBytes); err != nil {
+
+		if err = useTokenByAgent(sdk); err != nil {
 			fmt.Println("useTokenByAgent error: ", err)
 			return
 		}
-		if err = removeAgents(sdk, resourceIdBytes); err != nil {
+
+		if err = removeAgents(sdk); err != nil {
 			fmt.Println("removeAgents error: ", err)
 			return
 		}
-		if err = addTokenAgents(sdk, resourceIdBytes); err != nil {
+
+		if err = addTokenAgents(sdk); err != nil {
 			fmt.Println("addTokenAgents error: ", err)
 			return
 		}
-		if err = removeTokenAgents(sdk, resourceIdBytes); err != nil {
+		if err = removeTokenAgents(sdk); err != nil {
 			fmt.Println("removeTokenAgents error: ", err)
 			return
 		}
 
-		err = useToken(sdk, resourceIdBytes)
+		err = useToken(sdk)
 		if err != nil {
 			fmt.Println("useToken: %s", err)
 			return
@@ -110,8 +150,8 @@ func main() {
 	}
 }
 
-func addTokenAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().AddTokenAgents(resourceIdBytes, buyer,
+func addTokenAgents(sdk *ddxf_sdk.DdxfSdk) error {
+	txHash, err := sdk.DefDTokenKit().AddTokenAgents(buyer,
 		[]common.Address{agent.Address}, *tokenTemplate, 1)
 	if err != nil {
 		return err
@@ -119,8 +159,8 @@ func addTokenAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 	return showNotify(sdk, "addTokenAgents", txHash.ToHexString())
 }
 
-func removeTokenAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().RemoveTokenAgents(resourceIdBytes, *tokenTemplate, buyer,
+func removeTokenAgents(sdk *ddxf_sdk.DdxfSdk) error {
+	txHash, err := sdk.DefDTokenKit().RemoveTokenAgents(*tokenTemplate, buyer,
 		[]common.Address{agent.Address})
 	if err != nil {
 		return err
@@ -128,33 +168,33 @@ func removeTokenAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 	return showNotify(sdk, "removeTokenAgents", txHash.ToHexString())
 }
 
-func removeAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().RemoveAgents(resourceIdBytes, buyer, []common.Address{agent.Address})
+func removeAgents(sdk *ddxf_sdk.DdxfSdk) error {
+	txHash, err := sdk.DefDTokenKit().RemoveAgents(buyer, []common.Address{agent.Address}, []market_place_contract.TokenTemplate{*tokenTemplate})
 	if err != nil {
 		return err
 	}
 	return showNotify(sdk, "removeAgents", txHash.ToHexString())
 }
 
-func useTokenByAgent(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().UseTokenByAgents(resourceIdBytes, buyer.Address, agent, *tokenTemplate, 1)
+func useTokenByAgent(sdk *ddxf_sdk.DdxfSdk) error {
+	txHash, err := sdk.DefDTokenKit().UseTokenByAgents(buyer.Address, agent, *tokenTemplate, 1)
 	if err != nil {
 		return err
 	}
 	return showNotify(sdk, "UseTokenByAgents", txHash.ToHexString())
 }
 
-func addAgents(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().AddAgents(resourceIdBytes, buyer,
-		[]common.Address{agent.Address}, 1)
+func addAgents(sdk *ddxf_sdk.DdxfSdk) error {
+	txHash, err := sdk.DefDTokenKit().AddAgents(buyer,
+		[]common.Address{agent.Address}, 1, []market_place_contract.TokenTemplate{*tokenTemplate})
 	if err != nil {
 		fmt.Println("AddAgents: %s", err)
 		return err
 	}
 	return showNotify(sdk, "addAgents", txHash.ToHexString())
 }
-func useToken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().UseToken(resourceIdBytes, buyer, *tokenTemplate, 1)
+func useToken(sdk *ddxf_sdk.DdxfSdk) error {
+	txHash, err := sdk.DefDTokenKit().UseToken(buyer, *tokenTemplate, 1)
 	if err != nil {
 		return err
 	}
@@ -162,7 +202,7 @@ func useToken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 }
 
 func buyAndUseToken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().BuyAndUseToken(buyer, payer, resourceIdBytes, 2)
+	txHash, err := sdk.DefMpKit().BuyAndUseToken(buyer, payer, resourceIdBytes, 2, *tokenTemplate)
 	if err != nil {
 		return err
 	}
@@ -170,7 +210,7 @@ func buyAndUseToken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 }
 
 func buyDtoken(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	txHash, err := sdk.DefDDXFKit().BuyDtoken(buyer, payer, resourceIdBytes, 2)
+	txHash, err := sdk.DefMpKit().BuyDtoken(buyer, payer, resourceIdBytes, 2)
 	if err != nil {
 		return err
 	}
@@ -189,17 +229,21 @@ func showNotify(sdk *ddxf_sdk.DdxfSdk, method, txHash string) error {
 	return nil
 }
 
-func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
-	dataId := ""
-	tokenTemplate = &ddxf_contract.TokenTemplate{
-		DataID:     dataId,
-		TokenHashs: []string{string(common.UINT256_EMPTY[:])},
+func delete(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	txHash, err := sdk.DefMpKit().Delete(seller, resourceIdBytes)
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
-	trt := &ddxf_contract.TokenResourceTyEndpoint{
-		TokenTemplate: tokenTemplate,
-		ResourceType:  0,
-		Endpoint:      "",
+	evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
+	fmt.Println(evt)
+	return nil
+}
+func update(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 	itemMeta := map[string]interface{}{
 		"key": "value",
 	}
@@ -209,23 +253,22 @@ func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 	}
 	itemMetaHash, err := common.Uint256ParseFromBytes(bs[:])
 
-	ddo := ddxf_contract.ResourceDDO{
-		TokenResourceTyEndpoints: []*ddxf_contract.TokenResourceTyEndpoint{trt}, // RT for tokens
-		Manager:                  seller.Address,                                // data owner id
-		ItemMetaHash:             itemMetaHash,                                  // required if len(Templates) > 1
-		DTC:                      common.ADDRESS_EMPTY,                          // can be empty
-		MP:                       common.ADDRESS_EMPTY,                          // can be empty
-		Split:                    common.ADDRESS_EMPTY,
+	ddo := market_place_contract.ResourceDDO{
+		Manager:      seller.Address,       // data owner id
+		ItemMetaHash: itemMetaHash,         // required if len(Templates) > 1
+		DTC:          common.ADDRESS_EMPTY, // can be empty
+		MP:           common.ADDRESS_EMPTY, // can be empty
+		Split:        common.ADDRESS_EMPTY,
 	}
 
-	item := ddxf_contract.DTokenItem{
-		Fee: ddxf_contract.Fee{
+	item := market_place_contract.DTokenItem{
+		Fee: market_place_contract.Fee{
 			ContractType: 0,
 			Count:        1,
 		},
 		ExpiredDate: uint64(time.Now().Unix()) + 10000,
 		Stocks:      10000,
-		Templates:   []*ddxf_contract.TokenTemplate{tokenTemplate},
+		Templates:   []*market_place_contract.TokenTemplate{tokenTemplate},
 	}
 
 	sp := split_policy_contract.SplitPolicyRegisterParam{
@@ -244,7 +287,61 @@ func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 		TokenTy: split_policy_contract.ONG,
 	}
 
-	txHash, err := sdk.DefDDXFKit().Publish(seller, resourceIdBytes, ddo, item, sp)
+	txHash, err := sdk.DefMpKit().Update(seller, resourceIdBytes, ddo, item, sp)
+	if err != nil {
+		fmt.Printf("Publish error:%s\n", err)
+		return err
+	}
+	fmt.Println("publish txHash: ", txHash.ToHexString())
+
+	return showNotify(sdk, "update", txHash.ToHexString())
+}
+
+func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
+	itemMeta := map[string]interface{}{
+		"key": "value",
+	}
+	bs, err := ddxf.HashObject(itemMeta)
+	if err != nil {
+		return err
+	}
+	itemMetaHash, err := common.Uint256ParseFromBytes(bs[:])
+
+	ddo := market_place_contract.ResourceDDO{
+		Manager:      seller.Address,       // data owner id
+		ItemMetaHash: itemMetaHash,         // required if len(Templates) > 1
+		DTC:          common.ADDRESS_EMPTY, // can be empty
+		MP:           common.ADDRESS_EMPTY, // can be empty
+		Split:        common.ADDRESS_EMPTY,
+	}
+
+	item := market_place_contract.DTokenItem{
+		Fee: market_place_contract.Fee{
+			ContractType: 0,
+			Count:        1,
+		},
+		ExpiredDate: uint64(time.Now().Unix()) + 10000,
+		Stocks:      10000,
+		Templates:   []*market_place_contract.TokenTemplate{tokenTemplate},
+	}
+
+	sp := split_policy_contract.SplitPolicyRegisterParam{
+		AddrAmts: []*split_policy_contract.AddrAmt{
+			&split_policy_contract.AddrAmt{
+				To:          seller.Address,
+				Percent:     5000,
+				HasWithdraw: false,
+			},
+			&split_policy_contract.AddrAmt{
+				To:          admin.Address,
+				Percent:     5000,
+				HasWithdraw: false,
+			},
+		},
+		TokenTy: split_policy_contract.ONG,
+	}
+
+	txHash, err := sdk.DefMpKit().Publish(seller, resourceIdBytes, ddo, item, sp)
 	if err != nil {
 		fmt.Printf("Publish error:%s\n", err)
 		return err

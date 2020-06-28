@@ -20,22 +20,30 @@ var (
 	buyer         *ontology_go_sdk.Account
 	agent         *ontology_go_sdk.Account
 	payer         *ontology_go_sdk.Account
-	gasPrice      = uint64(0)
+	gasPrice      = uint64(500)
 	tokenTemplate *market_place_contract.TokenTemplate
 )
 
 //3f2c66242810aacc4d033758c03f182fbf31df84  split
 func main() {
 	testNet := "http://106.75.224.136:20336"
+	testNet = ddxf_sdk.TestNet
 	sdk := ddxf_sdk.NewDdxfSdk(testNet)
 	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
 	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
+	wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
+	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
 	if err != nil {
 		fmt.Printf("error in ReadFile:%s\n", err)
+		return
+	}
+	if false {
+		evt, _ := sdk.GetSmartCodeEvent("51c821e2f48af9d8488c6c0de5e466139c9fa8952d9ffc03c863dc84e1c3da65")
+		fmt.Println(evt)
 		return
 	}
 	pwd := []byte("123456")
@@ -55,10 +63,27 @@ func main() {
 	contractAddr := common.AddressFromVmCode(code)
 	fmt.Printf("contractAddr:%s, contractAddr:%s\n", contractAddr.ToBase58(), contractAddr.ToHexString())
 	//return
-	if false {
+	if true {
 		deployContract(sdk, admin, codeHex)
 		return
 	}
+	if true {
+		kit := sdk.DefContract(contractAddr)
+		txHash, err := kit.Invoke("init", seller, []interface{}{})
+		if err != nil {
+			fmt.Println("err", err)
+			return
+		}
+		time.Sleep(6 * time.Second)
+		evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+		if err != nil {
+			fmt.Println("err", err)
+			return
+		}
+		fmt.Println("evt:", evt)
+		return
+	}
+
 	sdk.SetMpContractAddress(contractAddr)
 	if false {
 		dtoken, _ := common.AddressFromHexString("466b94488bf2ad1b1eec0ae7e49e40708e71a35d")

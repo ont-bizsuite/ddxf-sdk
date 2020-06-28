@@ -33,10 +33,9 @@ func main() {
 	sdk := ddxf_sdk.NewDdxfSdk(testNet)
 	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
+	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
-	wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
+	//wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/accountant.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
@@ -72,7 +71,7 @@ func main() {
 	contractAddr := common.AddressFromVmCode(code)
 	fmt.Printf("contractAddr:%s, contractAddr:%s\n", contractAddr.ToBase58(), contractAddr.ToHexString())
 	//oep init
-	if true {
+	if false {
 		contract := sdk.DefContract(contractAddr)
 		txHash, err := contract.Invoke("init", seller, []interface{}{})
 		if err != nil {
@@ -89,11 +88,11 @@ func main() {
 	}
 
 	//return
-	if true {
+	if false {
 		deployContract(sdk, seller, codeHex)
 		return
 	}
-	if true {
+	if false {
 		kit := sdk.DefContract(contractAddr)
 		txHash, err := kit.Invoke("init", seller, []interface{}{})
 		if err != nil {
@@ -124,9 +123,9 @@ func main() {
 		return
 	}
 
-	if false {
-		sdk.SetGasPrice(0)
-		contractAddr, _ := common.AddressFromHexString("9d0203fc1c1a5019c53fdf62ae3232f5a72f5d80")
+	if true {
+		sdk.SetGasPrice(500)
+		contractAddr, _ := common.AddressFromHexString("e01d500ed0c1719b7750367ae59b4b2d308d1ceb")
 		txHash, err := sdk.DefDTokenKit().SetMpContractAddr(seller, contractAddr)
 		if err != nil {
 			fmt.Println(err)

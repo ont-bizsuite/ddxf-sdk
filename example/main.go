@@ -20,22 +20,38 @@ var (
 	buyer         *ontology_go_sdk.Account
 	agent         *ontology_go_sdk.Account
 	payer         *ontology_go_sdk.Account
-	gasPrice      = uint64(0)
+	gasPrice      = uint64(500)
 	tokenTemplate *market_place_contract.TokenTemplate
 )
 
 //3f2c66242810aacc4d033758c03f182fbf31df84  split
 func main() {
 	testNet := "http://106.75.224.136:20336"
+	//testNet = ddxf_sdk.TestNet
+	testNet = "http://113.31.112.154:20336"
+	testNet = ddxf_sdk.MainNet
 	sdk := ddxf_sdk.NewDdxfSdk(testNet)
 	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
 	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
+	//wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/accountant.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
 	if err != nil {
 		fmt.Printf("error in ReadFile:%s\n", err)
+		return
+	}
+	if false {
+		data, er := sdk.GetOntologySdk().Native.OntId.GetDocumentJson("did:ont:AVFKrE54v1uSrB2c3uxkkcB4KnPpYm7Au6")
+		if er != nil {
+			fmt.Println(er)
+			return
+		}
+		fmt.Println("data:", string(data))
+		evt, _ := sdk.GetSmartCodeEvent("4096bc1c8d7337cb1527d4e959bda3cd500976cfcaf3344cea4055446bb9de8a")
+		fmt.Println(evt)
 		return
 	}
 	pwd := []byte("123456")
@@ -54,11 +70,45 @@ func main() {
 	codeHex := common.ToHexString(code)
 	contractAddr := common.AddressFromVmCode(code)
 	fmt.Printf("contractAddr:%s, contractAddr:%s\n", contractAddr.ToBase58(), contractAddr.ToHexString())
-	//return
+	//oep init
 	if false {
-		deployContract(sdk, admin, codeHex)
+		contract := sdk.DefContract(contractAddr)
+		txHash, err := contract.Invoke("init", seller, []interface{}{})
+		if err != nil {
+			fmt.Println("err:", err)
+			return
+		}
+		evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+		if err != nil {
+			fmt.Println("err:", err)
+			return
+		}
+		fmt.Println(evt)
 		return
 	}
+
+	//return
+	if false {
+		deployContract(sdk, seller, codeHex)
+		return
+	}
+	if false {
+		kit := sdk.DefContract(contractAddr)
+		txHash, err := kit.Invoke("init", seller, []interface{}{})
+		if err != nil {
+			fmt.Println("err", err)
+			return
+		}
+		time.Sleep(6 * time.Second)
+		evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+		if err != nil {
+			fmt.Println("err", err)
+			return
+		}
+		fmt.Println("evt:", evt)
+		return
+	}
+
 	sdk.SetMpContractAddress(contractAddr)
 	if false {
 		dtoken, _ := common.AddressFromHexString("466b94488bf2ad1b1eec0ae7e49e40708e71a35d")
@@ -73,9 +123,9 @@ func main() {
 		return
 	}
 
-	if false {
-		sdk.SetGasPrice(0)
-		contractAddr, _ := common.AddressFromHexString("9d0203fc1c1a5019c53fdf62ae3232f5a72f5d80")
+	if true {
+		sdk.SetGasPrice(500)
+		contractAddr, _ := common.AddressFromHexString("e01d500ed0c1719b7750367ae59b4b2d308d1ceb")
 		txHash, err := sdk.DefDTokenKit().SetMpContractAddr(seller, contractAddr)
 		if err != nil {
 			fmt.Println(err)

@@ -27,9 +27,9 @@ var (
 //3f2c66242810aacc4d033758c03f182fbf31df84  split
 func main() {
 	testNet := "http://106.75.224.136:20336"
-	//testNet = ddxf_sdk.TestNet
-	testNet = "http://113.31.112.154:20336"
-	testNet = ddxf_sdk.MainNet
+	testNet = ddxf_sdk.TestNet
+	//testNet = "http://113.31.112.154:20336"
+	//testNet = ddxf_sdk.MainNet
 	sdk := ddxf_sdk.NewDdxfSdk(testNet)
 	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
@@ -41,17 +41,6 @@ func main() {
 	code, err := ioutil.ReadFile(wasmFile)
 	if err != nil {
 		fmt.Printf("error in ReadFile:%s\n", err)
-		return
-	}
-	if false {
-		data, er := sdk.GetOntologySdk().Native.OntId.GetDocumentJson("did:ont:AVFKrE54v1uSrB2c3uxkkcB4KnPpYm7Au6")
-		if er != nil {
-			fmt.Println(er)
-			return
-		}
-		fmt.Println("data:", string(data))
-		evt, _ := sdk.GetSmartCodeEvent("4096bc1c8d7337cb1527d4e959bda3cd500976cfcaf3344cea4055446bb9de8a")
-		fmt.Println(evt)
 		return
 	}
 	pwd := []byte("123456")
@@ -66,6 +55,68 @@ func main() {
 	buyer, _ = wallet.GetAccountByAddress("AHhXa11suUgVLX1ZDFErqBd3gskKqLfa5N", pwd)
 	agent, _ = wallet.GetAccountByAddress("ANb3bf1b67WP2ZPh5HQt4rkrmphMJmMCMK", pwd)
 	payer, _ = wallet.GetAccountByAddress("AQCQ3Krh6qxeWKKRACNehA8kAATHxoQNWJ", pwd)
+
+	if true {
+		wallet, err := sdk.GetOntologySdk().OpenWallet("./wallet.dat")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		iden, err := wallet.NewDefaultSettingIdentity(pwd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(iden.ID)
+		txhash, err := sdk.GetOntologySdk().Native.OntId.RegIDWithPublicKey(500, 2000000, seller, iden.ID, seller)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		evt, err := sdk.GetSmartCodeEvent(txhash.ToHexString())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("RegIDWithPublicKey evt:", evt)
+
+		att := []*ontology_go_sdk.DDOAttribute{
+			&ontology_go_sdk.DDOAttribute{
+				Key:       []byte("key"),
+				Value:     []byte("value"),
+				ValueType: []byte{},
+			},
+		}
+		tx, err := sdk.GetOntologySdk().Native.OntId.NewAddAttributesTransaction(500, 200000, iden.ID, att, seller.PublicKey)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		sdk.GetOntologySdk().SignToTransaction(tx, seller)
+		txhash, err = sdk.GetOntologySdk().SendTransaction(tx)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		evt, err = sdk.GetSmartCodeEvent(txhash.ToHexString())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("AddAttributes evt:", evt)
+
+		return
+
+		data, er := sdk.GetOntologySdk().Native.OntId.GetDocumentJson("did:ont:AVFKrE54v1uSrB2c3uxkkcB4KnPpYm7Au6")
+		if er != nil {
+			fmt.Println(er)
+			return
+		}
+		fmt.Println("data:", string(data))
+		evt, _ = sdk.GetSmartCodeEvent("4096bc1c8d7337cb1527d4e959bda3cd500976cfcaf3344cea4055446bb9de8a")
+		fmt.Println(evt)
+		return
+	}
 
 	codeHex := common.ToHexString(code)
 	contractAddr := common.AddressFromVmCode(code)

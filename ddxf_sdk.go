@@ -28,7 +28,7 @@ const (
 )
 
 const (
-	defaultGasPrice = 500
+	defaultGasPrice = 2500
 	defaultGasLimit = 31600000
 )
 

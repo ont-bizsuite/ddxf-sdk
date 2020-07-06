@@ -1,12 +1,16 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/ont-bizsuite/ddxf-sdk"
+	"github.com/ont-bizsuite/ddxf-sdk/example/base"
 	"github.com/ont-bizsuite/ddxf-sdk/market_place_contract"
 	"github.com/ont-bizsuite/ddxf-sdk/split_policy_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
+	"github.com/ontio/ontology/core/types"
+	"github.com/ontio/ontology/core/utils"
 	"github.com/zhiqiangxu/ddxf"
 	"io/ioutil"
 	"math/rand"
@@ -20,19 +24,25 @@ var (
 	buyer         *ontology_go_sdk.Account
 	agent         *ontology_go_sdk.Account
 	payer         *ontology_go_sdk.Account
-	gasPrice      = uint64(0)
+	gasPrice      = uint64(500)
 	tokenTemplate *market_place_contract.TokenTemplate
 )
 
 //3f2c66242810aacc4d033758c03f182fbf31df84  split
 func main() {
 	testNet := "http://106.75.224.136:20336"
+	testNet = ddxf_sdk.TestNet
+	//testNet = "http://113.31.112.154:20336"
+	//testNet = ddxf_sdk.MainNet
 	sdk := ddxf_sdk.NewDdxfSdk(testNet)
 	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
 	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
+	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
+	//wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/accountant.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
 	if err != nil {
 		fmt.Printf("error in ReadFile:%s\n", err)
@@ -51,14 +61,171 @@ func main() {
 	agent, _ = wallet.GetAccountByAddress("ANb3bf1b67WP2ZPh5HQt4rkrmphMJmMCMK", pwd)
 	payer, _ = wallet.GetAccountByAddress("AQCQ3Krh6qxeWKKRACNehA8kAATHxoQNWJ", pwd)
 
+	if true {
+
+		bs, err := sdk.GetOntologySdk().Native.OntId.GetDocumentJson("did:ont:TXvDhLqrqvAV6XUAmLEfWLjxmS1ESxbZBr")
+
+		fmt.Println(string(bs))
+		return
+		wallet, err := sdk.GetOntologySdk().OpenWallet("./wallet.dat")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		iden, err := wallet.NewDefaultSettingIdentity(pwd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("iden:", iden.ID)
+		txhash, err := sdk.GetOntologySdk().Native.OntId.RegIDWithPublicKey(500, 2000000, seller, iden.ID, seller)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		evt, err := sdk.GetSmartCodeEvent(txhash.ToHexString())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("RegIDWithPublicKey evt:", evt)
+
+		//att := []*DDOAttribute{
+		//	&DDOAttribute{
+		//		Key:       []byte("key"),
+		//		Value:     []byte("value"),
+		//		ValueType: []byte{},
+		//	},
+		//}
+		contractAddr, _ := common.AddressFromHexString("df04263aa6ff06bdaf6ba50d29c4cb2a188078cd")
+		con := sdk.DefContract(contractAddr)
+
+		iden2, err := wallet.NewDefaultSettingIdentity(pwd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("iden2:", iden2.ID)
+		rp := base.RegIdParam{
+			Ontid: []byte(iden2.ID),
+			Group: base.Group{
+				Members:   [][]byte{[]byte(iden.ID)},
+				Threshold: 1,
+			},
+			Signer: []base.Signer{
+				base.Signer{
+					Id:    []byte(iden.ID),
+					Index: uint32(1),
+				},
+			},
+			Attributes: []base.DDOAttribute{
+				base.DDOAttribute{
+					Key:       []byte("key"),
+					Value:     []byte("value"),
+					ValueType: []byte("ty"),
+				},
+			},
+		}
+		sink := common.NewZeroCopySink(nil)
+		rp.Serialize(sink)
+
+		bs, err = utils.BuildWasmContractParam([]interface{}{"reg_id_add_attribute_array", []interface{}{sink.Bytes()}})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(hex.EncodeToString(bs))
+
+		txhash, err = con.Invoke("reg_id_add_attribute_array", seller,
+			[]interface{}{[]interface{}{sink.Bytes()}})
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		evt, err = sdk.GetSmartCodeEvent(txhash.ToHexString())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(evt)
+		return
+
+		//tx, err := sdk.GetOntologySdk().Native.OntId.NewAddAttributesTransaction(500, 200000, iden.ID, att, seller.PublicKey)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		var tx *types.MutableTransaction
+		sdk.GetOntologySdk().SignToTransaction(tx, seller)
+		txhash, err = sdk.GetOntologySdk().SendTransaction(tx)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		evt, err = sdk.GetSmartCodeEvent(txhash.ToHexString())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("AddAttributes evt:", evt)
+
+		return
+
+		data, er := sdk.GetOntologySdk().Native.OntId.GetDocumentJson("did:ont:AVFKrE54v1uSrB2c3uxkkcB4KnPpYm7Au6")
+		if er != nil {
+			fmt.Println(er)
+			return
+		}
+		fmt.Println("data:", string(data))
+		evt, _ = sdk.GetSmartCodeEvent("4096bc1c8d7337cb1527d4e959bda3cd500976cfcaf3344cea4055446bb9de8a")
+		fmt.Println(evt)
+		return
+	}
+
 	codeHex := common.ToHexString(code)
 	contractAddr := common.AddressFromVmCode(code)
 	fmt.Printf("contractAddr:%s, contractAddr:%s\n", contractAddr.ToBase58(), contractAddr.ToHexString())
-	//return
+	//oep init
 	if false {
-		deployContract(sdk, admin, codeHex)
+		contract := sdk.DefContract(contractAddr)
+		txHash, err := contract.Invoke("init", seller, []interface{}{})
+		if err != nil {
+			fmt.Println("err:", err)
+			return
+		}
+		evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+		if err != nil {
+			fmt.Println("err:", err)
+			return
+		}
+		fmt.Println(evt)
 		return
 	}
+
+	//return
+	if true {
+		deployContract(sdk, seller, codeHex)
+		return
+	}
+	if false {
+		kit := sdk.DefContract(contractAddr)
+		txHash, err := kit.Invoke("init", seller, []interface{}{})
+		if err != nil {
+			fmt.Println("err", err)
+			return
+		}
+		time.Sleep(6 * time.Second)
+		evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+		if err != nil {
+			fmt.Println("err", err)
+			return
+		}
+		fmt.Println("evt:", evt)
+		return
+	}
+
 	sdk.SetMpContractAddress(contractAddr)
 	if false {
 		dtoken, _ := common.AddressFromHexString("466b94488bf2ad1b1eec0ae7e49e40708e71a35d")
@@ -73,9 +240,9 @@ func main() {
 		return
 	}
 
-	if false {
-		sdk.SetGasPrice(0)
-		contractAddr, _ := common.AddressFromHexString("9d0203fc1c1a5019c53fdf62ae3232f5a72f5d80")
+	if true {
+		sdk.SetGasPrice(500)
+		contractAddr, _ := common.AddressFromHexString("e01d500ed0c1719b7750367ae59b4b2d308d1ceb")
 		txHash, err := sdk.DefDTokenKit().SetMpContractAddr(seller, contractAddr)
 		if err != nil {
 			fmt.Println(err)
@@ -149,7 +316,7 @@ func main() {
 
 		err = useToken(sdk)
 		if err != nil {
-			fmt.Println("useToken: %s", err)
+			fmt.Printf("useToken: %s\n", err)
 			return
 		}
 	}
@@ -193,7 +360,7 @@ func addAgents(sdk *ddxf_sdk.DdxfSdk) error {
 	txHash, err := sdk.DefDTokenKit().AddAgents(buyer,
 		[]common.Address{agent.Address}, 1, []market_place_contract.TokenTemplate{*tokenTemplate})
 	if err != nil {
-		fmt.Println("AddAgents: %s", err)
+		fmt.Printf("AddAgents: %s\n", err)
 		return err
 	}
 	return showNotify(sdk, "addAgents", txHash.ToHexString())

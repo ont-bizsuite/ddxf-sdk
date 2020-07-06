@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ont-bizsuite/ddxf-sdk/any_contract"
 	"github.com/ont-bizsuite/ddxf-sdk/base_contract"
-	"github.com/ont-bizsuite/ddxf-sdk/data_id_contract"
 	"github.com/ont-bizsuite/ddxf-sdk/dtoken_contract"
 	"github.com/ont-bizsuite/ddxf-sdk/market_place_contract"
 	"github.com/ontio/ontology-go-sdk"
@@ -15,8 +14,10 @@ import (
 )
 
 const (
-	mpContractAddress     = "9d0203fc1c1a5019c53fdf62ae3232f5a72f5d80"
-	dataIdContractAddress = "03d07edc239d6c8cd99543bdef7a4bc407f9d44c"
+	mpContractAddressTest     = "9d0203fc1c1a5019c53fdf62ae3232f5a72f5d80"
+	dtokenContractAddressTest = "466b94488bf2ad1b1eec0ae7e49e40708e71a35d"
+
+	mpContractAddress     = "e01d500ed0c1719b7750367ae59b4b2d308d1ceb"
 	dtokenContractAddress = "466b94488bf2ad1b1eec0ae7e49e40708e71a35d"
 )
 
@@ -27,7 +28,7 @@ const (
 )
 
 const (
-	defaultGasPrice = 500
+	defaultGasPrice = 2500
 	defaultGasLimit = 31600000
 )
 
@@ -36,7 +37,6 @@ type DdxfSdk struct {
 	bc           *base_contract.BaseContract
 	rpc          string
 	defDDXFKit   *market_place_contract.MpKit
-	defDataIdKit *data_id_contract.DataIdKit
 	defDTokenKit *dtoken_contract.DTokenKit
 	gasPrice     uint64
 	gasLimit     uint64
@@ -78,34 +78,25 @@ func (sdk *DdxfSdk) GetOntologySdk() *ontology_go_sdk.OntologySdk {
 	return sdk.sdk
 }
 
-func (sdk *DdxfSdk) SignTx(tx *types.MutableTransaction, signer *ontology_go_sdk.Account) (*types.MutableTransaction, error) {
+func (sdk *DdxfSdk) SignTx(tx *types.MutableTransaction, signer *ontology_go_sdk.Account) error {
 	if sdk.payer != nil {
 		sdk.sdk.SetPayer(tx, sdk.payer.Address)
 		err := sdk.sdk.SignToTransaction(tx, sdk.payer)
 		if err != nil {
-			return nil, fmt.Errorf("payer sign tx error: %s", err)
+			return fmt.Errorf("payer sign tx error: %s", err)
 		}
 	}
 	if sdk.payer != signer {
 		err := sdk.sdk.SignToTransaction(tx, signer)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return tx, nil
+	return nil
 }
 
 func (sdk *DdxfSdk) SendTx(tx *types.MutableTransaction) (common.Uint256, error) {
 	return sdk.sdk.SendTransaction(tx)
-}
-
-func (sdk *DdxfSdk) DefDataIdKit() *data_id_contract.DataIdKit {
-	if sdk.defDataIdKit == nil {
-		contractAddress, _ := common.AddressFromHexString(dataIdContractAddress)
-		sdk.defDataIdKit = data_id_contract.NewDataIdContractKit(contractAddress,
-			sdk.bc)
-	}
-	return sdk.defDataIdKit
 }
 
 func (sdk *DdxfSdk) DefDTokenKit() *dtoken_contract.DTokenKit {
@@ -131,7 +122,7 @@ func (sdk *DdxfSdk) SetMpContractAddress(ddxf common.Address) {
 }
 
 func (sdk *DdxfSdk) GetSmartCodeEvent(txHash string) (*common2.SmartContactEvent, error) {
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 30; i++ {
 		event, err := sdk.sdk.GetSmartContractEvent(txHash)
 		if event != nil {
 			return event, err

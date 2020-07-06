@@ -71,7 +71,7 @@ itemMeta := map[string]interface{}{
     "attr2": "value2",
 }
 
-itemMetaHash, _ = ddxf.HashObject(input.Item)
+itemMetaHash, _ = ddxf.HashObject(itemMeta)
 ddo := ResourceDDO{
 		Manager:      account.Address,
 		ItemMetaHash: itemMetaHash,

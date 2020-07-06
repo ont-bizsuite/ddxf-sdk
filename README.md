@@ -30,13 +30,6 @@ import (
     "github.com/zhiqiangxu/ddxf"
 )
 
-type DataIdInfo struct {
-	DataId       string
-	DataMetaHash common.Uint256
-	DataHash     common.Uint256
-	Owners       []*OntIdIndex
-}
-
 dataID := uuid.NewV4().String()
 dataMeta := map[string]interface{}{
     "dataMetaAttr":"value",
@@ -70,9 +63,6 @@ import (
 )
 
 
-wallet, _ := osdk.NewOntologySdk().OpenWallet("./wallet.dat")
-
-account, _ = wallet.GetAccountByAddress("account_address", []byte("password"))
 
 resource := uuid.NewV4().String()
 
@@ -86,20 +76,6 @@ ddo := ResourceDDO{
 		Manager:      account.Address,
 		ItemMetaHash: itemMetaHash,
 	}
-
-templates := make([]*market_place_contract.TokenTemplate, 0)
-for i := 0; i < len(dataMetas); i++ {
-    var dataMetaHash [sha256.Size]byte
-    dataMetaHash = dataMetaHashArray[i]
-    u, _ := common2.Uint256ParseFromBytes(dataMetaHash[:])
-    dataId := res[u.ToHexString()]
-    tt := &market_place_contract.TokenTemplate{
-        DataID:     dataId.(string),
-        TokenHashs: []string{"1"},
-        Endpoint:   "aaaa",
-    }
-    templates = append(templates, tt)
-}
 
 item := market_place_contract.DTokenItem{
 		Fee: market_place_contract.Fee{

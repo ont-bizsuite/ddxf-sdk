@@ -9,11 +9,12 @@ First of all, create a ddxf sdk instance and prepare the account:
 ```golang
 import (
     osdk "github.com/ontio/ontology-go-sdk"
+    dsdk "github.com/ont-bizsuite/ddxf-sdk"
 )
 
 // ontology testnet
 addr := "http://polaris2.ont.io:20336"
-sdk := NewDdxfSdk(addr)
+sdk := dsdk.NewDdxfSdk(addr)
 
 wallet, _ := osdk.NewOntologySdk().OpenWallet("./wallet.dat")
 

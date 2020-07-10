@@ -8,25 +8,6 @@ import (
 	"io"
 )
 
-type DataMetaInfo struct {
-	DataMeta     map[string]interface{} `json:"dataMeta"`
-	DataMetaHash string                 `json:"dataMetaHash"`
-	ResourceType byte                   `json:"resourceType"`
-	Fee          Fee                    `json:"fee"`
-	Stock        uint32                 `json:"stock"`
-	ExpiredDate  uint64                 `json:"expiredDate"`
-	DataEndpoint string                 `json:"dataEndpoint"`
-	DataHash     string                 `json:"dataHash"`
-	DataId       string                 `json:"dataId"`
-}
-
-type TokenMetaInfo struct {
-	TokenMeta     map[string]interface{} `json:"tokenMeta"`
-	TokenMetaHash string                 `json:"tokenMetaHash"`
-	DataMetaHash  string                 `json:"dataMetaHash"`
-	TokenEndpoint string                 `json:"tokenEndpoint"`
-}
-
 type ProductInfoOnChain struct {
 	ResourceDdo *ResourceDDO
 	DtokenItem  *DTokenItem
@@ -91,9 +72,11 @@ func (this *CountAndAgent) FromBytes(data []byte) error {
 }
 
 type TokenTemplate struct {
-	DataID     string // can be empty
-	TokenHashs []string
-	Endpoint   string
+	DataID      string // can be empty
+	TokenHashs  []string
+	Endpoint    string
+	TokenName   string
+	TokenSymbol string
 }
 
 func (this *TokenTemplate) Deserialize(source *common.ZeroCopySource) error {
@@ -126,6 +109,16 @@ func (this *TokenTemplate) Deserialize(source *common.ZeroCopySource) error {
 		return fmt.Errorf("read endpoint failed irregular:%v, eof:%v", irregular, eof)
 	}
 	this.Endpoint = endpoint
+	name, _, irr, eof := source.NextString()
+	if irr || eof {
+		return fmt.Errorf("read name failed irregular:%v, eof:%v", irregular, eof)
+	}
+	symbol, _, irr, eof := source.NextString()
+	if irr || eof {
+		return fmt.Errorf("read symbol failed irregular:%v, eof:%v", irregular, eof)
+	}
+	this.TokenName = name
+	this.TokenSymbol = symbol
 	return nil
 }
 
@@ -141,6 +134,8 @@ func (this TokenTemplate) Serialize(sink *common.ZeroCopySink) {
 		sink.WriteString(this.TokenHashs[i])
 	}
 	sink.WriteString(this.Endpoint)
+	sink.WriteString(this.TokenName)
+	sink.WriteString(this.TokenSymbol)
 }
 
 func (this *TokenTemplate) ToBytes() []byte {
@@ -290,11 +285,11 @@ func (this *Fee) Deserialize(source *common.ZeroCopySource) error {
 }
 
 type DTokenItem struct {
-	Fee         Fee
-	ExpiredDate uint64
-	Stocks      uint32
-	Sold        uint32
-	Templates   []*TokenTemplate
+	Fee              Fee
+	ExpiredDate      uint64
+	Stocks           uint32
+	Sold             uint32
+	TokenTemplateIds []string
 }
 
 func (this *DTokenItem) Serialize(sink *common.ZeroCopySink) {
@@ -302,9 +297,9 @@ func (this *DTokenItem) Serialize(sink *common.ZeroCopySink) {
 	sink.WriteUint64(this.ExpiredDate)
 	sink.WriteUint32(this.Stocks)
 	sink.WriteUint32(this.Sold)
-	sink.WriteVarUint(uint64(len(this.Templates)))
-	for _, item := range this.Templates {
-		item.Serialize(sink)
+	sink.WriteVarUint(uint64(len(this.TokenTemplateIds)))
+	for _, item := range this.TokenTemplateIds {
+		sink.WriteString(item)
 	}
 }
 func (this *DTokenItem) Deserialize(source *common.ZeroCopySource) error {
@@ -329,14 +324,13 @@ func (this *DTokenItem) Deserialize(source *common.ZeroCopySource) error {
 	if irre || eof {
 		return fmt.Errorf("read tokentemplate length failed, irre: %v, eof: %v", irre, eof)
 	}
-	tts := make([]*TokenTemplate, l)
+	tts := make([]string, l)
 	for i := 0; i < int(l); i++ {
-		tt := &TokenTemplate{}
-		err = tt.Deserialize(source)
-		if err != nil {
-			return err
+		id,_, irre,eof := source.NextString()
+		if irre || eof {
+			return fmt.Errorf("read tokentemplateId failed, irre: %v, eof: %v", irre, eof)
 		}
-		tts[i] = tt
+		tts[i] = id
 	}
 	return nil
 }

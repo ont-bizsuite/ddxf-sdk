@@ -3,6 +3,7 @@
 
 This sdk is used to interact with the [ddxf contract suite](https://github.com/ont-bizsuite/ddxf-contract-suite).
 
+目前，ddxf-sdk封装了`dtoken`合约、`marketplace`合约和`split_policy`合约的调用实现。
 
 First of all, create a ddxf sdk instance and prepare the account:
 
@@ -30,7 +31,7 @@ import (
     "github.com/zhiqiangxu/ddxf"
 )
 
-dataID := uuid.NewV4().String()
+dataID, _ := ontology_go_sdk.GenerateID()
 dataMeta := map[string]interface{}{
     "dataMetaAttr":"value",
 }

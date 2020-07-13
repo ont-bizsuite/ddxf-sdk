@@ -36,11 +36,11 @@ func main() {
 	sdk := ddxf_sdk.NewDdxfSdk(testNet)
 	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
-	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
 	//wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
+	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/accountant.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/vote/output/vote.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
@@ -70,49 +70,19 @@ func main() {
 	contractAddr := common.AddressFromVmCode(code)
 	fmt.Printf("contractAddr:%s, contractAddr:%s\n", contractAddr.ToBase58(), contractAddr.ToHexString())
 	//return
-	//oep init
-	if false {
-		contract := sdk.DefContract(contractAddr)
-		res, err := contract.PreInvoke("getAdmin", []interface{}{})
-		if err != nil {
-			fmt.Println("err:", err)
-			return
-		}
-		bs, err := res.ToByteArray()
-		addr, _ := common.AddressParseFromBytes(bs)
-		fmt.Println(hex.EncodeToString(bs))
-		fmt.Println(addr.ToBase58())
-		return
-	}
 
-	//return
 	if false {
-		//dtoken abca489757738322dbd48419c0ba2d765f3d3a6a
-		// mp 0fcae6645ed37da79e63107dc2fc2b2a0541fe25
+		//dtoken 3343753265152550e5a1741cea946436744ab442
+		// mp 5fbcadf08b14aa737de8af429483dc4fb1ae13d3
+		// openkg dcd823e05f330a0a838730754bcc2f7e7cf0af57
 		deployContract(sdk, seller, codeHex)
-		return
-	}
-	if false {
-		kit := sdk.DefContract(contractAddr)
-		txHash, err := kit.Invoke("init", seller, []interface{}{})
-		if err != nil {
-			fmt.Println("err", err)
-			return
-		}
-		time.Sleep(6 * time.Second)
-		evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
-		if err != nil {
-			fmt.Println("err", err)
-			return
-		}
-		fmt.Println("evt:", evt)
 		return
 	}
 
 	//
 	if false {
 		sdk.SetMpContractAddress(contractAddr)
-		dtoken, _ := common.AddressFromHexString("abca489757738322dbd48419c0ba2d765f3d3a6a")
+		dtoken, _ := common.AddressFromHexString("3343753265152550e5a1741cea946436744ab442")
 		split, _ := common.AddressFromHexString("f024034fe7e5ea69c53cede4774bd1dad566234f")
 		sdk.SetGasPrice(2500)
 		txHash, err := sdk.DefMpKit().Init(seller, dtoken, split)
@@ -123,10 +93,29 @@ func main() {
 		showNotify(sdk, "init", txHash.ToHexString())
 		return
 	}
-
+	//openkg
 	if true {
-		sdk.DefDTokenKit().SetContractAddr(contractAddr)
+		con := sdk.DefContract(contractAddr)
 		if false {
+			dtoken,_ := common.AddressFromHexString("3343753265152550e5a1741cea946436744ab442")
+			utils.SetDtokenContractAddr(sdk, con, seller,dtoken)
+			return
+		}
+		if false {
+			mp,_ := common.AddressFromHexString("5fbcadf08b14aa737de8af429483dc4fb1ae13d3")
+			utils.SetMpContractAddr(sdk, con, seller,mp)
+			return
+		}
+		if true {
+			resource_id := []byte("9110197415809951086")
+			tokenId,_ := hex.DecodeString("30")
+			utils.BuyAndUseToken(sdk, con,resource_id,1,buyer,payer, tokenId)
+			return
+		}
+	}
+	if false {
+		sdk.DefDTokenKit().SetContractAddr(contractAddr)
+		if true {
 			utils.CreateTokenTemplate(sdk, seller)
 			return
 		}
@@ -171,26 +160,11 @@ func main() {
 		return
 	}
 
-	if false {
-		sdk.SetGasPrice(2500)
-		//contractAddr, _ := common.AddressFromHexString("e01d500ed0c1719b7750367ae59b4b2d308d1ceb")
-		txHash, err := sdk.DefDTokenKit().SetMpContractAddr(seller, contractAddr)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(evt)
-		return
-	}
-
 	if true {
 		sdk.DefMpKit().SetContractAddress(contractAddr)
-		resourceIdBytes := []byte(strconv.Itoa(rand.Int()))
+		resourceId := strconv.Itoa(rand.Int())
+		fmt.Println("resourceId:",resourceId)
+		resourceIdBytes := []byte(resourceId)
 		dataId := ""
 		tokenTemplate = &market_place_contract.TokenTemplate{
 			DataID:     dataId,
@@ -206,7 +180,7 @@ func main() {
 		//	fmt.Println("delete error: ", err)
 		//	return
 		//}
-
+		//
 		//if err := update(sdk, resourceIdBytes); err != nil {
 		//	fmt.Println("update error: ", err)
 		//	return

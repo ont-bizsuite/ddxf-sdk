@@ -300,7 +300,7 @@ func update(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 		Manager:      seller.Address,       // data owner id
 		ItemMetaHash: itemMetaHash,         // required if len(Templates) > 1
 		DTC:          common.ADDRESS_EMPTY, // can be empty
-		MP:           common.ADDRESS_EMPTY, // can be empty
+		Accountant:   common.ADDRESS_EMPTY, // can be empty
 		Split:        common.ADDRESS_EMPTY,
 	}
 
@@ -356,7 +356,7 @@ func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 		Manager:      seller.Address,       // data owner id
 		ItemMetaHash: itemMetaHash,         // required if len(Templates) > 1
 		DTC:          common.ADDRESS_EMPTY, // can be empty
-		MP:           common.ADDRESS_EMPTY, // can be empty
+		Accountant:   common.ADDRESS_EMPTY, // can be empty
 		Split:        common.ADDRESS_EMPTY,
 	}
 

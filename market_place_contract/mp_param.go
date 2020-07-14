@@ -178,7 +178,7 @@ type ResourceDDO struct {
 	Manager      common.Address // data owner id
 	ItemMetaHash common.Uint256 //
 	DTC          common.Address // can be empty
-	MP           common.Address // can be empty
+	Accountant   common.Address // can be empty
 	Split        common.Address // can be empty
 }
 
@@ -192,9 +192,9 @@ func (this *ResourceDDO) Serialize(sink *common.ZeroCopySink) {
 	} else {
 		sink.WriteBool(false)
 	}
-	if this.MP != common.ADDRESS_EMPTY {
+	if this.Accountant != common.ADDRESS_EMPTY {
 		sink.WriteBool(true)
-		sink.WriteAddress(this.MP)
+		sink.WriteAddress(this.Accountant)
 	} else {
 		sink.WriteBool(false)
 	}
@@ -231,7 +231,7 @@ func (this *ResourceDDO) Deserialize(source *common.ZeroCopySource) error {
 		return fmt.Errorf("read mp failed irregular:%v, eof:%v", irregular, eof)
 	}
 	if data {
-		this.MP, eof = source.NextAddress()
+		this.Accountant, eof = source.NextAddress()
 		if eof {
 			return io.ErrUnexpectedEOF
 		}

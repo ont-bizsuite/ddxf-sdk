@@ -114,10 +114,10 @@ Event设计
 ```
 [string, string, bytearray, int, bytearray]
 ```
-第一个参数表示调用的合约的方法名
-第二个参数输入的参数acc的地址
-第三个参数表示TokenTemplateId
-第四个参数表示n
+第一个参数表示调用的合约的方法名,
+第二个参数输入的参数acc的地址,
+第三个参数表示TokenTemplateId,
+第四个参数表示n,
 第五个参数表示生成的TokenId
 
 5. BalanceOf
@@ -232,6 +232,37 @@ resourceId []byte,n int) (common.Uint256, error)
 * `payer` 付钱方的Account
 * `resourceId` 商品的唯一性标志
 * `n` 购买的数量
+
+## SplitPolicy合约接口设计
+
+分润合约设计， 该合约用于物品的多个所有者进行分润，
+
+1. `Register` 注册分润参数
+接口设计
+```
+func (this *SplitPolicyKit) Register(key []byte, rp SplitPolicyRegisterParam,
+	signer *ontology_go_sdk.Account) (common.Uint256, error)
+```
+
+参数解释
+* `key` 也是`Marketplace`合约发布商品的参数resourceId
+* `SplitPolicyRegisterParam`
+   * `AddrAmts`  分配的地址和权重, 地址是该商品的收钱地址
+   * `TokenTy`   Token类型， 目前支持的有ont, ong, oep4
+   * `ContractAddr` Token合约地址
+
+
+2. `Withdraw` 提现
+买家购买商品后，会把钱打到该合约地址，商品的收钱地址调用该方法提取属于自己的那部分收入
+接口设计
+```
+func (this *SplitPolicyKit) Withdraw(key []byte, signer *ontology_go_sdk.Account) 
+(common.Uint256, error) 
+```
+
+参数解释
+* `key` 也是`Marketplace`合约发布商品的参数resourceId
+* `signer` 商品的收钱地址
 
 
 

@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"time"
+	"github.com/ont-bizsuite/ddxf-sdk/base_contract"
 )
 
 var (

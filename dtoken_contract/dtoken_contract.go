@@ -6,6 +6,7 @@ import (
 	"github.com/ont-bizsuite/ddxf-sdk/market_place_contract"
 	"github.com/ontio/ontology-go-sdk"
 	"github.com/ontio/ontology/common"
+	"github.com/ontio/ontology/core/types"
 )
 
 type DTokenKit struct {
@@ -53,10 +54,40 @@ func (this *DTokenKit) CreateTokenTemplate(creator *ontology_go_sdk.Account,
 	return this.bc.Invoke(this.contractAddress, creator, "createTokenTemplate", []interface{}{creator.Address, sink.Bytes()})
 }
 
+func (this *DTokenKit) BuildCreateTokenTemplateTx(creator common.Address,
+	tt market_place_contract.TokenTemplate) (*types.MutableTransaction, error) {
+	sink := common.NewZeroCopySink(nil)
+	tt.Serialize(sink)
+	return this.bc.BuildTx(this.contractAddress, "createTokenTemplate", []interface{}{creator, sink.Bytes()})
+}
+
+func (this *DTokenKit) BuildUpdateTokenTemplateTx(tokenTemplateId []byte,
+	tt market_place_contract.TokenTemplate) (*types.MutableTransaction, error) {
+	sink := common.NewZeroCopySink(nil)
+	tt.Serialize(sink)
+	return this.bc.BuildTx(this.contractAddress, "updateTokenTemplate", []interface{}{tokenTemplateId, sink.Bytes()})
+}
+
+func (this *DTokenKit) BuildRemoveTokenTemplateTx(tokenTemplateId []byte) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "removeTokenTemplate", []interface{}{tokenTemplateId})
+}
+
 func (this *DTokenKit) AuthorizeTokenTemplate(creator *ontology_go_sdk.Account, tokenTemplateId []byte,
 	authorizeAddr common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, creator, "authorizeTokenTemplate",
 		[]interface{}{tokenTemplateId, authorizeAddr})
+}
+
+func (this *DTokenKit) BuildAuthorizeAddrTx(tokenTemplateId []byte,
+	authorizeAddr []common.Address) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "authorizeTokenTemplate",
+		[]interface{}{tokenTemplateId, parseAddressArr(authorizeAddr)})
+}
+
+func (this *DTokenKit) BuildRemAuthorizeAddrTx(tokenTemplateId []byte,
+	authorizeAddr []common.Address) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "removeAuthorizeAddr",
+		[]interface{}{tokenTemplateId, parseAddressArr(authorizeAddr)})
 }
 
 func (this *DTokenKit) GetAuthorizedAddr(tokenTemplateId []byte) ([]common.Address, error) {
@@ -102,6 +133,11 @@ func (this *DTokenKit) GenerateDToken(acc *ontology_go_sdk.Account, tokenTemplat
 	return this.bc.Invoke(this.contractAddress, acc, "generateDToken", []interface{}{acc.Address, tokenTemplateId, n})
 }
 
+func (this *DTokenKit) BuildGenerateDTokenTx(acc common.Address, tokenTemplateId []byte,
+	n int) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "generateDToken", []interface{}{acc, tokenTemplateId, n})
+}
+
 func (this *DTokenKit) BalanceOf(addr common.Address, tokenId []byte) (uint64, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "balanceOf", []interface{}{addr, tokenId})
 	if err != nil {
@@ -136,6 +172,22 @@ func (this *DTokenKit) UseToken(buyer *ontology_go_sdk.Account,
 		[]interface{}{buyer.Address, tokenId, n})
 }
 
+func (this *DTokenKit) TransferToken(from, to *ontology_go_sdk.Account,
+	tokenId []byte, n int) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, from, "transfer",
+		[]interface{}{from.Address, to.Address, tokenId, n})
+}
+
+func (this *DTokenKit) BuildTransferTokenTx(from, to common.Address,
+	tokenId []byte, n int) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "transfer",
+		[]interface{}{from, to, tokenId, n})
+}
+
+func (this *DTokenKit) BuildUseTokenTx(buyer common.Address, tokenId []byte, n int) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "useToken", []interface{}{buyer, tokenId, n})
+}
+
 func (this *DTokenKit) UseTokenByAgents(tokenOwner common.Address,
 	agent *ontology_go_sdk.Account, tokenId []byte, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, agent, "useTokenByAgent",
@@ -151,7 +203,13 @@ func (this *DTokenKit) SetAgents(account *ontology_go_sdk.Account,
 func (this *DTokenKit) SetTokenAgents(account *ontology_go_sdk.Account,
 	agents []common.Address, tokenId []byte, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "setTokenAgents",
-		[]interface{}{account.Address, agents, tokenId, n})
+		[]interface{}{account.Address, parseAddressArr(agents), tokenId, n})
+}
+
+func (this *DTokenKit) BuildSetTokenAgentsTx(account common.Address,
+	agents []common.Address, tokenId []byte, n int) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "setTokenAgents",
+		[]interface{}{account, parseAddressArr(agents), tokenId, n})
 }
 
 func (this *DTokenKit) AddAgents(account *ontology_go_sdk.Account,
@@ -178,6 +236,12 @@ func (this *DTokenKit) AddTokenAgents(account *ontology_go_sdk.Account,
 		[]interface{}{account.Address, tokenId, parseAddressArr(agents), n})
 }
 
+func (this *DTokenKit) BuildAddTokenAgentsTx(account common.Address,
+	agents []common.Address, tokenId []byte, n int) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "addTokenAgents",
+		[]interface{}{account, tokenId, parseAddressArr(agents), n})
+}
+
 func (this *DTokenKit) RemoveAgents(account *ontology_go_sdk.Account,
 	agents []common.Address, tokenIds [][]byte) (common.Uint256, error) {
 	tokenIdParam := make([]interface{}, 0)
@@ -192,4 +256,10 @@ func (this *DTokenKit) RemoveTokenAgents(tokenId []byte, account *ontology_go_sd
 	agents []common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, account, "removeTokenAgents",
 		[]interface{}{account.Address, tokenId, parseAddressArr(agents)})
+}
+
+func (this *DTokenKit) BuildRemoveTokenAgentsTx(tokenId []byte, account common.Address,
+	agents []common.Address) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "removeTokenAgents",
+		[]interface{}{account, tokenId, parseAddressArr(agents)})
 }

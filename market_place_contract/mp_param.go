@@ -214,17 +214,20 @@ func (this *ResourceDDO) Deserialize(source *common.ZeroCopySource) error {
 	if irregular || eof {
 		return errors.New("2. ResourceDDO Deserialize l error")
 	}
-	data, irregular, eof := source.NextBool()
+	l, _, irregular, eof := source.NextVarUint()
 	if irregular || eof {
 		return fmt.Errorf("read dtc failed irregular:%v, eof:%v", irregular, eof)
 	}
-	if data {
-		this.DTC, eof = source.NextAddress()
+	addrs := make([]common.Address, l)
+	for i := 0; i < int(l); i++ {
+		addrs[i], eof = source.NextAddress()
 		if eof {
 			return io.ErrUnexpectedEOF
 		}
 	}
-	data, irregular, eof = source.NextBool()
+	this.DTC = addrs
+
+	data, irregular, eof := source.NextBool()
 	if irregular || eof {
 		return fmt.Errorf("read mp failed irregular:%v, eof:%v", irregular, eof)
 	}

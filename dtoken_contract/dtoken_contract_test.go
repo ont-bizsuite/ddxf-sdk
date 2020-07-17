@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"time"
+	"github.com/ont-bizsuite/ddxf-sdk/base_contract"
 )
 
 var (
@@ -66,7 +67,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestDTokenKit_GetDDXFContractAddr(t *testing.T) {
-	addr, err := dTokenKit.GetDDXFContractAddr()
+	addr, err := dTokenKit.GetMpContractAddr()
 	assert.Nil(t, err)
 	fmt.Println("addr: ", addr.ToHexString())
 }

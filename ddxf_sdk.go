@@ -23,13 +23,13 @@ const (
 
 const (
 	MainNet  = "http://dappnode1.ont.io:20336"
-	TestNet  = "http://polaris1.ont.io:20336"
+	TestNet  = "http://polaris2.ont.io:20336"
 	LocalNet = "http://127.0.0.1:20336"
 )
 
 const (
 	defaultGasPrice = 2500
-	defaultGasLimit = 31600000
+	defaultGasLimit = 31800000
 )
 
 type DdxfSdk struct {

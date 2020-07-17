@@ -177,6 +177,12 @@ func (this *MpKit) BuyDtoken(buyer, payer *ontology_go_sdk.Account, resourceId [
 	return this.bc.GetOntologySdk().SendTransaction(tx)
 }
 
+func (this *MpKit) BuildBuyDTokenTx(buyer, payer common.Address, resourceId []byte,
+	n int) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "buyDToken",
+		[]interface{}{resourceId, n, buyer, payer})
+}
+
 func (this *MpKit) BuyDtokenReward(buyer, payer *ontology_go_sdk.Account, resourceId []byte,
 	n int, unitPrice int) (common.Uint256, error) {
 	if payer == nil {

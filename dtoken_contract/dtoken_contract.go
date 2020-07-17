@@ -54,6 +54,30 @@ func (this *DTokenKit) CreateTokenTemplate(creator *ontology_go_sdk.Account,
 	return this.bc.Invoke(this.contractAddress, creator, "createTokenTemplate", []interface{}{creator.Address, sink.Bytes()})
 }
 
+func (this *DTokenKit) GetTokenTemplateById(tokenTemplateId []byte) (tt *market_place_contract.TokenTemplate, err error) {
+	res, err := this.bc.PreInvoke(this.contractAddress, "getTokenTemplateById", []interface{}{tokenTemplateId})
+	if err != nil {
+		return
+	}
+	bs,err := res.ToByteArray()
+	if err != nil {
+		return
+	}
+	source := common.NewZeroCopySource(bs)
+	hasVal,ir, eof := source.NextBool()
+	if ir || eof {
+		err = fmt.Errorf("ir: %v, eof: %v", ir, eof)
+		return
+	}
+	if hasVal {
+		tt = &market_place_contract.TokenTemplate{}
+		err = tt.Deserialize(source)
+	}
+	return
+}
+
+
+
 func (this *DTokenKit) BuildCreateTokenTemplateTx(creator common.Address,
 	tt market_place_contract.TokenTemplate) (*types.MutableTransaction, error) {
 	sink := common.NewZeroCopySink(nil)
@@ -132,6 +156,7 @@ func (this *DTokenKit) GetTemplateIdByTokenId(tokenId []byte) ([]byte, error) {
 func (this *DTokenKit) GenerateDToken(acc *ontology_go_sdk.Account, tokenTemplateId []byte, n int) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, acc, "generateDToken", []interface{}{acc.Address, tokenTemplateId, n})
 }
+
 
 func (this *DTokenKit) BuildGenerateDTokenTx(acc common.Address, tokenTemplateId []byte,
 	n int) (*types.MutableTransaction, error) {

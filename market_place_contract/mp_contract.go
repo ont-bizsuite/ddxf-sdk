@@ -113,7 +113,7 @@ func (this *MpKit) BuildPublishTx(resourceId []byte,
 	return tx, err
 }
 
-func (this *MpKit) getPublishProductInfo(resourceId []byte) (*ProductInfoOnChain, error) {
+func (this *MpKit) GetPublishProductInfo(resourceId []byte) (*ProductInfoOnChain, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "getSellerItemInfo",
 		[]interface{}{resourceId})
 	if err != nil {

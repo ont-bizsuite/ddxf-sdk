@@ -175,22 +175,20 @@ func (this *TokenResourceTyEndpoint) Deserialize(source *common.ZeroCopySource) 
 
 // ResourceDDO is ddo for resource
 type ResourceDDO struct {
-	Manager      common.Address // data owner id
-	ItemMetaHash common.Uint256 //
-	DTC          common.Address // can be empty
-	Accountant   common.Address // can be empty
-	Split        common.Address // can be empty
+	Manager      common.Address   // data owner id
+	ItemMetaHash common.Uint256   //
+	DTC          []common.Address // can be empty
+	Accountant   common.Address   // can be empty
+	Split        common.Address   // can be empty
 }
 
 func (this *ResourceDDO) Serialize(sink *common.ZeroCopySink) {
 	sink.WriteAddress(this.Manager)
 	//TODO
 	sink.WriteHash(this.ItemMetaHash)
-	if this.DTC != common.ADDRESS_EMPTY {
-		sink.WriteBool(true)
-		sink.WriteAddress(this.DTC)
-	} else {
-		sink.WriteBool(false)
+	sink.WriteVarUint(uint64(len(this.DTC)))
+	for _, addr := range this.DTC {
+		sink.WriteAddress(addr)
 	}
 	if this.Accountant != common.ADDRESS_EMPTY {
 		sink.WriteBool(true)
@@ -287,16 +285,16 @@ func (this *Fee) Deserialize(source *common.ZeroCopySource) error {
 type DTokenItem struct {
 	Fee              Fee
 	ExpiredDate      uint64
-	Stocks           uint32
-	Sold             uint32
+	Stocks           uint64
+	Sold             uint64
 	TokenTemplateIds []string
 }
 
 func (this *DTokenItem) Serialize(sink *common.ZeroCopySink) {
 	this.Fee.Serialize(sink)
 	sink.WriteUint64(this.ExpiredDate)
-	sink.WriteUint32(this.Stocks)
-	sink.WriteUint32(this.Sold)
+	sink.WriteUint64(this.Stocks)
+	sink.WriteUint64(this.Sold)
 	sink.WriteVarUint(uint64(len(this.TokenTemplateIds)))
 	for _, item := range this.TokenTemplateIds {
 		sink.WriteString(item)
@@ -312,11 +310,11 @@ func (this *DTokenItem) Deserialize(source *common.ZeroCopySource) error {
 	if eof {
 		return io.ErrUnexpectedEOF
 	}
-	this.Stocks, eof = source.NextUint32()
+	this.Stocks, eof = source.NextUint64()
 	if eof {
 		return fmt.Errorf("read stocks failed, eof: %v", eof)
 	}
-	this.Sold, eof = source.NextUint32()
+	this.Sold, eof = source.NextUint64()
 	if eof {
 		return fmt.Errorf("read sold failed, eof: %v", eof)
 	}
@@ -326,7 +324,7 @@ func (this *DTokenItem) Deserialize(source *common.ZeroCopySource) error {
 	}
 	tts := make([]string, l)
 	for i := 0; i < int(l); i++ {
-		id,_, irre,eof := source.NextString()
+		id, _, irre, eof := source.NextString()
 		if irre || eof {
 			return fmt.Errorf("read tokentemplateId failed, irre: %v, eof: %v", irre, eof)
 		}

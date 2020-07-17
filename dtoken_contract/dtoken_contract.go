@@ -195,31 +195,43 @@ func (this *DTokenKit) UseTokenByAgents(tokenOwner common.Address,
 }
 
 func (this *DTokenKit) SetAgents(account *ontology_go_sdk.Account,
-	agents []common.Address, n int) (common.Uint256, error) {
+	agents []common.Address, n []int) (common.Uint256, error) {
+	if len(agents) != len(n) {
+		return common.UINT256_EMPTY, fmt.Errorf("the length of agents: %d not equal n length: %d", len(agents), len(n))
+	}
 	return this.bc.Invoke(this.contractAddress, account, "setAgents",
-		[]interface{}{account.Address, agents, n})
+		[]interface{}{account.Address, parseAddressArr(agents), parseNArr(n)})
 }
 
 func (this *DTokenKit) SetTokenAgents(account *ontology_go_sdk.Account,
-	agents []common.Address, tokenId []byte, n int) (common.Uint256, error) {
+	agents []common.Address, tokenId []byte, n []int) (common.Uint256, error) {
+	if len(agents) != len(n) {
+		return common.UINT256_EMPTY, fmt.Errorf("the length of agents: %d not equal n length: %d", len(agents), len(n))
+	}
 	return this.bc.Invoke(this.contractAddress, account, "setTokenAgents",
-		[]interface{}{account.Address, parseAddressArr(agents), tokenId, n})
+		[]interface{}{account.Address, parseAddressArr(agents), tokenId, parseNArr(n)})
 }
 
 func (this *DTokenKit) BuildSetTokenAgentsTx(account common.Address,
-	agents []common.Address, tokenId []byte, n int) (*types.MutableTransaction, error) {
+	agents []common.Address, tokenId []byte, n []int) (*types.MutableTransaction, error) {
+	if len(agents) != len(n) {
+		return nil, fmt.Errorf("the length of agents: %d not equal n length: %d", len(agents), len(n))
+	}
 	return this.bc.BuildTx(this.contractAddress, "setTokenAgents",
-		[]interface{}{account, parseAddressArr(agents), tokenId, n})
+		[]interface{}{account, parseAddressArr(agents), tokenId, parseNArr(n)})
 }
 
 func (this *DTokenKit) AddAgents(account *ontology_go_sdk.Account,
-	agents []common.Address, n int, tokenIds [][]byte) (common.Uint256, error) {
+	agents []common.Address, n []int, tokenIds [][]byte) (common.Uint256, error) {
+	if len(agents) != len(n) {
+		return common.UINT256_EMPTY, fmt.Errorf("the length of agents: %d not equal n length: %d", len(agents), len(n))
+	}
 	tokenIdParam := make([]interface{}, 0)
 	for _, item := range tokenIds {
 		tokenIdParam = append(tokenIdParam, item)
 	}
 	return this.bc.Invoke(this.contractAddress, account, "addAgents",
-		[]interface{}{account.Address, parseAddressArr(agents), n, tokenIdParam})
+		[]interface{}{account.Address, parseAddressArr(agents), parseNArr(n), tokenIdParam})
 }
 
 func parseAddressArr(addrs []common.Address) []interface{} {
@@ -229,17 +241,30 @@ func parseAddressArr(addrs []common.Address) []interface{} {
 	}
 	return agentArr
 }
+func parseNArr(ns []int) []interface{} {
+	agentArr := make([]interface{}, len(ns))
+	for i := 0; i < len(ns); i++ {
+		agentArr[i] = ns[i]
+	}
+	return agentArr
+}
 
 func (this *DTokenKit) AddTokenAgents(account *ontology_go_sdk.Account,
-	agents []common.Address, tokenId []byte, n int) (common.Uint256, error) {
+	agents []common.Address, tokenId []byte, n []int) (common.Uint256, error) {
+	if len(agents) != len(n) {
+		return common.UINT256_EMPTY, fmt.Errorf("the length of agents: %d not equal n length: %d", len(agents), len(n))
+	}
 	return this.bc.Invoke(this.contractAddress, account, "addTokenAgents",
-		[]interface{}{account.Address, tokenId, parseAddressArr(agents), n})
+		[]interface{}{account.Address, tokenId, parseAddressArr(agents), parseNArr(n)})
 }
 
 func (this *DTokenKit) BuildAddTokenAgentsTx(account common.Address,
-	agents []common.Address, tokenId []byte, n int) (*types.MutableTransaction, error) {
+	agents []common.Address, tokenId []byte, n []int) (*types.MutableTransaction, error) {
+	if len(agents) != len(n) {
+		return nil, fmt.Errorf("the length of agents: %d not equal n length: %d", len(agents), len(n))
+	}
 	return this.bc.BuildTx(this.contractAddress, "addTokenAgents",
-		[]interface{}{account, tokenId, parseAddressArr(agents), n})
+		[]interface{}{account, tokenId, parseAddressArr(agents), parseNArr(n)})
 }
 
 func (this *DTokenKit) RemoveAgents(account *ontology_go_sdk.Account,

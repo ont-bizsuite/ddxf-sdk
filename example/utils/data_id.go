@@ -4,18 +4,17 @@ import (
 	"github.com/ont-bizsuite/ddxf-sdk/example/base"
 	"github.com/ont-bizsuite/ddxf-sdk"
 	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/utils"
 	"fmt"
 	"github.com/ontio/ontology-go-sdk"
+	"github.com/ontio/ontology/core/utils"
 	"encoding/hex"
 )
 
-func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Account) {
+func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Account, contractAddr common.Address) {
 
 	bs, err := sdk.GetOntologySdk().Native.OntId.GetDocumentJson("did:ont:TXvDhLqrqvAV6XUAmLEfWLjxmS1ESxbZBr")
 
 	fmt.Println(string(bs))
-	return
 	wallet, err := sdk.GetOntologySdk().OpenWallet("./wallet.dat")
 	if err != nil {
 		fmt.Println(err)
@@ -27,7 +26,7 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 		return
 	}
 	fmt.Println("iden:", iden.ID)
-	txhash, err := sdk.GetOntologySdk().Native.OntId.RegIDWithPublicKey(500, 2000000, seller, iden.ID, seller)
+	txhash, err := sdk.GetOntologySdk().Native.OntId.RegIDWithPublicKey(2500, 2000000, seller, iden.ID, seller)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -39,15 +38,7 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 	}
 	fmt.Println("RegIDWithPublicKey evt:", evt)
 
-	//att := []*DDOAttribute{
-	//	&DDOAttribute{
-	//		Key:       []byte("key"),
-	//		Value:     []byte("value"),
-	//		ValueType: []byte{},
-	//	},
-	//}
-	//contractAddr, _ := common.AddressFromHexString("df04263aa6ff06bdaf6ba50d29c4cb2a188078cd")
-	//con := sdk.DefContract(contractAddr)
+	con := sdk.DefContract(contractAddr)
 
 	iden2, err := wallet.NewDefaultSettingIdentity(pwd)
 	if err != nil {
@@ -78,12 +69,22 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 	sink := common.NewZeroCopySink(nil)
 	rp.Serialize(sink)
 
-	bs, err = utils.BuildWasmContractParam([]interface{}{"reg_id_add_attribute_array", []interface{}{sink.Bytes()}})
+
+	bs, err = utils.BuildWasmContractParam([]interface{}{"reg_id_add_attribute_array", []interface{}{[]interface{}{sink.Bytes()}}})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(hex.EncodeToString(bs))
+
+	fmt.Println("param:", hex.EncodeToString(bs))
+
+	txhash, err = con.Invoke("reg_id_add_attribute_array",seller, []interface{}{[]interface{}{sink.Bytes()}})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+
 
 	if err != nil {
 		fmt.Println(err)
@@ -98,7 +99,7 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 	fmt.Println(evt)
 	return
 
-	tx, err := sdk.GetOntologySdk().Native.OntId.NewAddAttributesTransaction(500, 200000, iden.ID, nil, seller.PublicKey)
+	tx, err := sdk.GetOntologySdk().Native.OntId.NewAddAttributesTransaction(2500, 200000, iden.ID, nil, seller.PublicKey)
 	if err != nil {
 		fmt.Println(err)
 		return

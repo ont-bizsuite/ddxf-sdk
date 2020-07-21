@@ -154,12 +154,12 @@ func (this *MpKit) BuildFreezeTx(resourceId []byte) (*types.MutableTransaction, 
 	return tx, nil
 }
 
-func (this *MpKit) BuyDtoken(buyer, payer *ontology_go_sdk.Account, resourceId []byte,
+func (this *MpKit) BuyDToken(buyer, payer *ontology_go_sdk.Account, resourceId []byte,
 	n int) (common.Uint256, error) {
 	if payer == nil {
 		payer = buyer
 	}
-	tx, err := this.bc.BuildTx(this.contractAddress, "buyDtoken",
+	tx, err := this.bc.BuildTx(this.contractAddress, "buyDToken",
 		[]interface{}{resourceId, n, buyer.Address, payer.Address})
 	if err != nil {
 		return common.UINT256_EMPTY, err
@@ -188,7 +188,7 @@ func (this *MpKit) BuyDtokenReward(buyer, payer *ontology_go_sdk.Account, resour
 	if payer == nil {
 		payer = buyer
 	}
-	tx, err := this.bc.BuildTx(this.contractAddress, "buyDtoken",
+	tx, err := this.bc.BuildTx(this.contractAddress, "buyDToken",
 		[]interface{}{resourceId, n, buyer.Address, payer.Address, unitPrice})
 	if err != nil {
 		return common.UINT256_EMPTY, err
@@ -202,24 +202,24 @@ func (this *MpKit) BuyDtokenReward(buyer, payer *ontology_go_sdk.Account, resour
 	return this.bc.GetOntologySdk().SendTransaction(tx)
 }
 
-func (this *MpKit) BuyAndUseToken(buyer, payer *ontology_go_sdk.Account, resourceId []byte,
-	n int, tokenTemplate TokenTemplate) (common.Uint256, error) {
-	if payer == nil {
-		payer = buyer
-	}
-	tx, err := this.bc.BuildTx(this.contractAddress, "buyAndUseToken",
-		[]interface{}{resourceId, n, buyer.Address, payer.Address, tokenTemplate.ToBytes()})
-	if err != nil {
-		return common.UINT256_EMPTY, err
-	}
-	if buyer.Address != payer.Address {
-		err = this.bc.GetOntologySdk().SignToTransaction(tx, payer)
-		if err != nil {
-			return common.UINT256_EMPTY, err
-		}
-	}
-	return this.bc.GetOntologySdk().SendTransaction(tx)
-}
+//func (this *MpKit) BuyAndUseToken(buyer, payer *ontology_go_sdk.Account, resourceId []byte,
+//	n int, tokenTemplate TokenTemplate) (common.Uint256, error) {
+//	if payer == nil {
+//		payer = buyer
+//	}
+//	tx, err := this.bc.BuildTx(this.contractAddress, "buyAndUseToken",
+//		[]interface{}{resourceId, n, buyer.Address, payer.Address, tokenTemplate.ToBytes()})
+//	if err != nil {
+//		return common.UINT256_EMPTY, err
+//	}
+//	if buyer.Address != payer.Address {
+//		err = this.bc.GetOntologySdk().SignToTransaction(tx, payer)
+//		if err != nil {
+//			return common.UINT256_EMPTY, err
+//		}
+//	}
+//	return this.bc.GetOntologySdk().SendTransaction(tx)
+//}
 
 func (this *MpKit) BuildBuyAndUseTokenTx(buyer, payer common.Address, resourceId []byte,
 	n int, tokenTemplate TokenTemplate) (*types.MutableTransaction, error) {

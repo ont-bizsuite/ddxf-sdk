@@ -8,6 +8,15 @@ import (
 	"github.com/ontio/ontology/common"
 )
 
+func Init(sdk *ddxf_sdk.DdxfSdk,con *any_contract.ContractKit,admin *ontology_go_sdk.Account,mp,dtoken common.Address) {
+	txHash, err := con.Invoke("init",admin, []interface{}{mp,dtoken})
+	if err != nil {
+		fmt.Println("err:", err)
+		return
+	}
+	showNotify(sdk,"init", txHash.ToHexString())
+}
+
 func SetDtokenContractAddr(sdk *ddxf_sdk.DdxfSdk,con *any_contract.ContractKit,admin *ontology_go_sdk.Account,dtoken common.Address) {
 	txHash, err := con.Invoke("setDtokenContractAddr",admin, []interface{}{dtoken})
 	if err != nil {

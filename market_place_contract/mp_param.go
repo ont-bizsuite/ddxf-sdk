@@ -182,6 +182,11 @@ type ResourceDDO struct {
 	Split        common.Address   // can be empty
 }
 
+func (this *ResourceDDO) FromBytes(data []byte) error {
+	source := common.NewZeroCopySource(data)
+	return this.Deserialize(source)
+}
+
 func (this *ResourceDDO) Serialize(sink *common.ZeroCopySink) {
 	sink.WriteAddress(this.Manager)
 	//TODO

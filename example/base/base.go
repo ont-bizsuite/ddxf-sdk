@@ -1,6 +1,9 @@
 package base
 
-import "github.com/ontio/ontology/common"
+import (
+	"fmt"
+	"github.com/ontio/ontology/common"
+)
 
 type Signer struct {
 	Id    []byte
@@ -57,8 +60,29 @@ type DDOAttribute struct {
 	ValueType []byte
 }
 
+//invoke wam contract
 func (this *DDOAttribute) Serialize(sink *common.ZeroCopySink) {
 	sink.WriteVarBytes(this.Key)
 	sink.WriteVarBytes(this.Value)
 	sink.WriteVarBytes(this.ValueType)
+}
+
+//parse from txpayload
+func (this *DDOAttribute) Deserialize(source *common.ZeroCopySource) error {
+	key, _, irr, eof := source.NextVarBytes()
+	if irr || eof {
+		return fmt.Errorf("irr: %s, eof: %s", irr, eof)
+	}
+	value, _, irr, eof := source.NextVarBytes()
+	if irr || eof {
+		return fmt.Errorf("irr: %s, eof: %s", irr, eof)
+	}
+	valueTy, _, irr, eof := source.NextVarBytes()
+	if irr || eof {
+		return fmt.Errorf("irr: %s, eof: %s", irr, eof)
+	}
+	this.Key = key
+	this.Value = value
+	this.ValueType = valueTy
+	return nil
 }

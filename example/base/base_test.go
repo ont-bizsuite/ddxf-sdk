@@ -1,10 +1,10 @@
 package base
 
 import (
+	"encoding/hex"
+	"fmt"
 	"github.com/ontio/ontology/common"
 	"testing"
-	"fmt"
-	"encoding/hex"
 )
 
 func TestSigner_Serialize(t *testing.T) {

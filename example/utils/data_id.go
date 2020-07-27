@@ -1,13 +1,13 @@
 package utils
 
 import (
-	"github.com/ont-bizsuite/ddxf-sdk/example/base"
-	"github.com/ont-bizsuite/ddxf-sdk"
-	"github.com/ontio/ontology/common"
-	"fmt"
-	"github.com/ontio/ontology-go-sdk"
-	"github.com/ontio/ontology/core/utils"
 	"encoding/hex"
+	"fmt"
+	"github.com/ont-bizsuite/ddxf-sdk"
+	"github.com/ont-bizsuite/ddxf-sdk/example/base"
+	"github.com/ontio/ontology-go-sdk"
+	"github.com/ontio/ontology/common"
+	"github.com/ontio/ontology/core/utils"
 )
 
 func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Account, contractAddr common.Address) {
@@ -21,8 +21,8 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 		return
 	}
 	var iden *ontology_go_sdk.Identity
-	members := make([][]byte,0)
-	for i:=0;i<16;i++ {
+	members := make([][]byte, 0)
+	for i := 0; i < 16; i++ {
 		iden, err = wallet.NewDefaultSettingIdentity(pwd)
 		if err != nil {
 			fmt.Println(err)
@@ -34,7 +34,7 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 			fmt.Println(err)
 			return
 		}
-		fmt.Println("txhash:",txhash.ToHexString())
+		fmt.Println("txhash:", txhash.ToHexString())
 		evt, err := sdk.GetSmartCodeEvent(txhash.ToHexString())
 		if err != nil {
 			fmt.Println(err)
@@ -43,7 +43,6 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 		fmt.Println("RegIDWithPublicKey evt:", evt)
 		members = append(members, []byte(iden.ID))
 	}
-
 
 	con := sdk.DefContract(contractAddr)
 
@@ -76,7 +75,6 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 	sink := common.NewZeroCopySink(nil)
 	rp.Serialize(sink)
 
-
 	bs, err = utils.BuildWasmContractParam([]interface{}{"reg_id_add_attribute_array", []interface{}{[]interface{}{sink.Bytes()}}})
 	if err != nil {
 		fmt.Println(err)
@@ -85,12 +83,11 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 
 	fmt.Println("param:", hex.EncodeToString(bs))
 
-	txhash, err := con.Invoke("reg_id_add_attribute_array",seller, []interface{}{[]interface{}{sink.Bytes()}})
+	txhash, err := con.Invoke("reg_id_add_attribute_array", seller, []interface{}{[]interface{}{sink.Bytes()}})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
 
 	evt, err := sdk.GetSmartCodeEvent(txhash.ToHexString())
 	if err != nil {

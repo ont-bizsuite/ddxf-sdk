@@ -63,5 +63,8 @@ func (this *BaseContract) BuildTx(contractAddr common.Address, method string, pa
 	if err != nil {
 		return nil, err
 	}
+	if this.payer != nil && tx.Payer == common.ADDRESS_EMPTY {
+		tx.Payer = this.payer.Address
+	}
 	return tx, nil
 }

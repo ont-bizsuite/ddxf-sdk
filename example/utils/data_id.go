@@ -20,23 +20,30 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 		fmt.Println(err)
 		return
 	}
-	iden, err := wallet.NewDefaultSettingIdentity(pwd)
-	if err != nil {
-		fmt.Println(err)
-		return
+	var iden *ontology_go_sdk.Identity
+	members := make([][]byte,0)
+	for i:=0;i<16;i++ {
+		iden, err = wallet.NewDefaultSettingIdentity(pwd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("iden:", iden.ID)
+		txhash, err := sdk.GetOntologySdk().Native.OntId.RegIDWithPublicKey(2500, 2000000, seller, iden.ID, seller)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("txhash:",txhash.ToHexString())
+		evt, err := sdk.GetSmartCodeEvent(txhash.ToHexString())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("RegIDWithPublicKey evt:", evt)
+		members = append(members, []byte(iden.ID))
 	}
-	fmt.Println("iden:", iden.ID)
-	txhash, err := sdk.GetOntologySdk().Native.OntId.RegIDWithPublicKey(2500, 2000000, seller, iden.ID, seller)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	evt, err := sdk.GetSmartCodeEvent(txhash.ToHexString())
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println("RegIDWithPublicKey evt:", evt)
+
 
 	con := sdk.DefContract(contractAddr)
 
@@ -49,7 +56,7 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 	rp := base.RegIdParam{
 		Ontid: []byte(iden2.ID),
 		Group: base.Group{
-			Members:   [][]byte{[]byte(iden.ID)},
+			Members:   members,
 			Threshold: 1,
 		},
 		Signer: []base.Signer{
@@ -78,20 +85,14 @@ func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Accou
 
 	fmt.Println("param:", hex.EncodeToString(bs))
 
-	txhash, err = con.Invoke("reg_id_add_attribute_array",seller, []interface{}{[]interface{}{sink.Bytes()}})
+	txhash, err := con.Invoke("reg_id_add_attribute_array",seller, []interface{}{[]interface{}{sink.Bytes()}})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
 
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	evt, err = sdk.GetSmartCodeEvent(txhash.ToHexString())
+	evt, err := sdk.GetSmartCodeEvent(txhash.ToHexString())
 	if err != nil {
 		fmt.Println(err)
 		return

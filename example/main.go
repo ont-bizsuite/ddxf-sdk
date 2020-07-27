@@ -31,7 +31,7 @@ func main() {
 	testNet := "http://106.75.224.136:20336"
 	testNet = ddxf_sdk.TestNet
 	//testNet = "http://172.168.3.47:20336"
-	testNet = "http://113.31.112.154:20336"
+	//testNet = "http://113.31.112.154:20336"
 	//testNet = ddxf_sdk.MainNet
 	sdk := ddxf_sdk.NewDdxfSdk(testNet)
 	//106.75.224.136
@@ -73,7 +73,7 @@ func main() {
 		return
 	}
 
-	if false {
+	if true {
 		utils.DataIdTest(sdk, pwd, seller, contractAddr)
 		return
 	}
@@ -86,13 +86,13 @@ func main() {
 
 	if false {
 		con := sdk.DefContract(contractAddr)
-		txhash, err := con.Invoke("destroy",seller, []interface{}{})
+		txhash, err := con.Invoke("destroy", seller, []interface{}{})
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		evt, err := sdk.GetSmartCodeEvent(txhash.ToHexString())
-		fmt.Println(evt,err)
+		fmt.Println(evt, err)
 		return
 	}
 

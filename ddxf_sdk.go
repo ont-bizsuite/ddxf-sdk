@@ -64,6 +64,10 @@ func (sdk *DdxfSdk) SetPayer(payer *ontology_go_sdk.Account) {
 	sdk.bc.SetPayer(payer)
 }
 
+func (sdk *DdxfSdk) GetPayer() *ontology_go_sdk.Account {
+	return sdk.payer
+}
+
 func (sdk *DdxfSdk) SetGasLimit(gasLimit uint64) {
 	sdk.gasLimit = gasLimit
 	sdk.bc.SetGasLimit(gasLimit)

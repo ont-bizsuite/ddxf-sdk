@@ -10,6 +10,7 @@ import (
 	"github.com/ontio/ontology/core/utils"
 )
 
+
 func DataIdTest(sdk *ddxf_sdk.DdxfSdk, pwd []byte, seller *ontology_go_sdk.Account, contractAddr common.Address) {
 
 	bs, err := sdk.GetOntologySdk().Native.OntId.GetDocumentJson("did:ont:TXvDhLqrqvAV6XUAmLEfWLjxmS1ESxbZBr")

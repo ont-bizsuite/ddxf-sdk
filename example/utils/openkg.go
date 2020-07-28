@@ -65,3 +65,22 @@ func BuyAndUseToken(sdk *ddxf_sdk.DdxfSdk, con *any_contract.ContractKit,
 	}
 	showNotify(sdk, "BuyAndUseToken", txHash.ToHexString())
 }
+
+func BuyRewardAndUseToken(sdk *ddxf_sdk.DdxfSdk, con *any_contract.ContractKit,
+	resource_id []byte, n int,unit_price int, buyer_account *ontology_go_sdk.Account, payer *ontology_go_sdk.Account,
+	token_template_id []byte) {
+	tx, err := con.BuildTx("buyRewardAndUseToken",
+		[]interface{}{resource_id, n, buyer_account.Address, payer.Address,unit_price, token_template_id})
+	if err != nil {
+		fmt.Println("err:", err)
+		return
+	}
+	sdk.SignTx(tx, buyer_account)
+	sdk.SignTx(tx, payer)
+	txHash, err := sdk.SendTx(tx)
+	if err != nil {
+		fmt.Println("err:", err)
+		return
+	}
+	showNotify(sdk, "buyRewardAndUseToken", txHash.ToHexString())
+}

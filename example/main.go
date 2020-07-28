@@ -37,10 +37,10 @@ func main() {
 	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
-	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
+	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
 	//wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
+	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/accountant.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/vote/output/vote.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
@@ -73,7 +73,7 @@ func main() {
 		return
 	}
 
-	if true {
+	if false {
 		utils.DataIdTest(sdk, pwd, seller, contractAddr)
 		return
 	}
@@ -96,10 +96,11 @@ func main() {
 		return
 	}
 
-	if true {
+	if false {
 		//dtoken b57362d82c658fb2927e793406ee8decf32ff2e9
-		// mp ac820725a3bc5337b6044aad38dc3293032eae99
-		// openkg dcd823e05f330a0a838730754bcc2f7e7cf0af57
+		// mp e7de9c28a6fd5c72d576c462b49e4335f4dfdbe2
+		// openkg 41b47a0ec9d8992f382cc33910a9281ea21369f7
+		// split_contract 47d305e5ae4ceb736da6189224f15052f0e32357
 		deployContract(sdk, seller, codeHex)
 		return
 	}
@@ -107,7 +108,7 @@ func main() {
 	if false {
 		sdk.SetMpContractAddress(contractAddr)
 		dtoken, _ := common.AddressFromHexString("b57362d82c658fb2927e793406ee8decf32ff2e9")
-		split, _ := common.AddressFromHexString("f024034fe7e5ea69c53cede4774bd1dad566234f")
+		split, _ := common.AddressFromHexString("47d305e5ae4ceb736da6189224f15052f0e32357")
 		sdk.SetGasPrice(2500)
 		txHash, err := sdk.DefMpKit().Init(seller, dtoken, split)
 		if err != nil {
@@ -117,13 +118,41 @@ func main() {
 		showNotify(sdk, "init", txHash.ToHexString())
 		return
 	}
+	if false {
+		con := sdk.DefContract(contractAddr)
+		resourceId := []byte("5945133018807634517")
+		res, err := con.PreInvoke("getRegisterParam", []interface{}{resourceId})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		data, err := res.ToByteArray()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		param := &split_policy_contract.SplitPolicyRegisterParam{}
+		err = param.FromBytes(data)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(param)
+		return
+	}
 	//openkg
 	if true {
 		con := sdk.DefContract(contractAddr)
 		if false {
-			mp, _ := common.AddressFromHexString("ac820725a3bc5337b6044aad38dc3293032eae99")
+			mp, _ := common.AddressFromHexString("e7de9c28a6fd5c72d576c462b49e4335f4dfdbe2")
 			dtoken, _ := common.AddressFromHexString("b57362d82c658fb2927e793406ee8decf32ff2e9")
 			utils.Init(sdk, con, seller, mp, dtoken)
+			return
+		}
+		if true {
+			resourceId := []byte("5945133018807634517")
+			templateId, _ := hex.DecodeString("30")
+			utils.BuyRewardAndUseToken(sdk, con, resourceId, 1, 10000000000, buyer, payer, templateId)
 			return
 		}
 		if false {
@@ -395,8 +424,8 @@ func publish(sdk *ddxf_sdk.DdxfSdk, resourceIdBytes []byte) error {
 	tokenTemplateId, _ := hex.DecodeString("30")
 	item := market_place_contract.DTokenItem{
 		Fee: market_place_contract.Fee{
-			ContractType: 0,
-			Count:        1,
+			ContractType: 1,
+			Count:        0,
 		},
 		ExpiredDate:      uint64(time.Now().Unix()) + 10000,
 		Stocks:           10000,

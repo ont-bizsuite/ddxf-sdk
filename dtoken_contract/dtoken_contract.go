@@ -95,9 +95,9 @@ func (this *DTokenKit) BuildRemoveTokenTemplateTx(tokenTemplateId []byte) (*type
 }
 
 func (this *DTokenKit) AuthorizeTokenTemplate(creator *ontology_go_sdk.Account, tokenTemplateId []byte,
-	authorizeAddr common.Address) (common.Uint256, error) {
+	authorizeAddr []common.Address) (common.Uint256, error) {
 	return this.bc.Invoke(this.contractAddress, creator, "authorizeTokenTemplate",
-		[]interface{}{tokenTemplateId, authorizeAddr})
+		[]interface{}{tokenTemplateId, parseAddressArr(authorizeAddr)})
 }
 
 func (this *DTokenKit) BuildAuthorizeAddrTx(tokenTemplateId []byte,

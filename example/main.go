@@ -36,11 +36,11 @@ func main() {
 	sdk := ddxf_sdk.NewDdxfSdk(testNet)
 	//106.75.224.136
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
-	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
+	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
 	//wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
-	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/accountant.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/vote/output/vote.wasm"
 	code, err := ioutil.ReadFile(wasmFile)
@@ -166,14 +166,20 @@ func main() {
 			return
 		}
 	}
-	if false {
+	//DToken
+	if true {
 		sdk.DefDTokenKit().SetContractAddr(contractAddr)
 		if false {
 			utils.CreateTokenTemplate(sdk, seller)
 			return
 		}
 		if false {
-			utils.GenerateDtoken(sdk, seller)
+			templateId, _ := hex.DecodeString("30")
+			utils.AuthorizeTokenTemplate(sdk, templateId, seller, []common.Address{buyer.Address, admin.Address})
+			return
+		}
+		if true {
+			utils.GenerateDtoken(sdk, buyer)
 			return
 		}
 		tokenId, _ := hex.DecodeString("31")

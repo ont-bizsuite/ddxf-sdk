@@ -22,17 +22,18 @@ func CreateTokenTemplate(sdk *ddxf_sdk.DdxfSdk, seller *ontology_go_sdk.Account)
 		fmt.Println("CreateTokenTemplate error: ", err)
 		return
 	}
-	showEvent(sdk, txhash)
-
+	showNotify(sdk, "CreateTokenTemplate", txhash.ToHexString())
 }
-func showEvent(sdk *ddxf_sdk.DdxfSdk, txHash common.Uint256) {
-	evt, err := sdk.GetSmartCodeEvent(txHash.ToHexString())
+
+func AuthorizeTokenTemplate(sdk *ddxf_sdk.DdxfSdk, templateId []byte, seller *ontology_go_sdk.Account, buyer []common.Address) {
+	txhash, err := sdk.DefDTokenKit().AuthorizeTokenTemplate(seller, templateId, buyer)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("CreateTokenTemplate error: ", err)
 		return
 	}
-	fmt.Println(evt)
+	showNotify(sdk, "AuthorizeTokenTemplate", txhash.ToHexString())
 }
+
 func GenerateDtoken(sdk *ddxf_sdk.DdxfSdk, seller *ontology_go_sdk.Account) {
 	tokenTemplateId, _ := hex.DecodeString("30")
 	txhash, err := sdk.DefDTokenKit().GenerateDToken(seller, tokenTemplateId, 1000)
@@ -40,7 +41,7 @@ func GenerateDtoken(sdk *ddxf_sdk.DdxfSdk, seller *ontology_go_sdk.Account) {
 		fmt.Println(err)
 		return
 	}
-	showEvent(sdk, txhash)
+	showNotify(sdk, "GenerateDtoken", txhash.ToHexString())
 }
 
 func BalanceOf(sdk *ddxf_sdk.DdxfSdk, addr common.Address, tokenId []byte) {

@@ -38,7 +38,7 @@ func main() {
 	wasmFile := "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/marketplace.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/dtoken.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/data_id.wasm"
-	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
+	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/split_policy.wasm"
 	//wasmFile = "/Users/sss/dev/rust_project/oep4-rust/output/oep_4.wasm"
 	wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/open_kg.wasm"
 	//wasmFile = "/Users/sss/dev/dockerData/rust_project/ddxf_market/output/accountant.wasm"
@@ -79,12 +79,6 @@ func main() {
 	}
 
 	if false {
-		code, err := sdk.GetOntologySdk().GetSmartContract(contractAddr.ToHexString())
-		fmt.Println(code, err)
-		return
-	}
-
-	if false {
 		con := sdk.DefContract(contractAddr)
 		txhash, err := con.Invoke("destroy", seller, []interface{}{})
 		if err != nil {
@@ -97,7 +91,7 @@ func main() {
 	}
 
 	if false {
-		//dtoken b57362d82c658fb2927e793406ee8decf32ff2e9
+		//dtoken a2c23b928883b75092178123c1a12cdb0c46f2bd
 		// mp e7de9c28a6fd5c72d576c462b49e4335f4dfdbe2
 		// openkg 41b47a0ec9d8992f382cc33910a9281ea21369f7
 		// split_contract 47d305e5ae4ceb736da6189224f15052f0e32357
@@ -107,7 +101,7 @@ func main() {
 
 	if false {
 		sdk.SetMpContractAddress(contractAddr)
-		dtoken, _ := common.AddressFromHexString("b57362d82c658fb2927e793406ee8decf32ff2e9")
+		dtoken, _ := common.AddressFromHexString("a2c23b928883b75092178123c1a12cdb0c46f2bd")
 		split, _ := common.AddressFromHexString("47d305e5ae4ceb736da6189224f15052f0e32357")
 		sdk.SetGasPrice(2500)
 		txHash, err := sdk.DefMpKit().Init(seller, dtoken, split)
@@ -141,11 +135,11 @@ func main() {
 		return
 	}
 	//openkg
-	if true {
+	if false {
 		con := sdk.DefContract(contractAddr)
-		if false {
+		if true {
 			mp, _ := common.AddressFromHexString("e7de9c28a6fd5c72d576c462b49e4335f4dfdbe2")
-			dtoken, _ := common.AddressFromHexString("b57362d82c658fb2927e793406ee8decf32ff2e9")
+			dtoken, _ := common.AddressFromHexString("a2c23b928883b75092178123c1a12cdb0c46f2bd")
 			utils.Init(sdk, con, seller, mp, dtoken)
 			return
 		}

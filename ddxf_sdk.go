@@ -17,8 +17,11 @@ const (
 	mpContractAddressTest     = "9d0203fc1c1a5019c53fdf62ae3232f5a72f5d80"
 	dtokenContractAddressTest = "466b94488bf2ad1b1eec0ae7e49e40708e71a35d"
 
-	mpContractAddress     = "e01d500ed0c1719b7750367ae59b4b2d308d1ceb"
-	dtokenContractAddress = "466b94488bf2ad1b1eec0ae7e49e40708e71a35d"
+	//mpContractAddress     = "e01d500ed0c1719b7750367ae59b4b2d308d1ceb"
+	//dtokenContractAddress = "466b94488bf2ad1b1eec0ae7e49e40708e71a35d"
+
+	mpContractAddress     = "e7de9c28a6fd5c72d576c462b49e4335f4dfdbe2"
+	dtokenContractAddress = "a2c23b928883b75092178123c1a12cdb0c46f2bd"
 )
 
 const (

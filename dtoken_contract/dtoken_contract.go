@@ -160,6 +160,15 @@ func (this *DTokenKit) BuildGenerateDTokenTx(acc common.Address, tokenTemplateId
 	return this.bc.BuildTx(this.contractAddress, "generateDToken", []interface{}{acc, tokenTemplateId, n})
 }
 
+func (this *DTokenKit) GenerateDTokenForOther(acc *ontology_go_sdk.Account, to common.Address, tokenTemplateId []byte, n int) (common.Uint256, error) {
+	return this.bc.Invoke(this.contractAddress, acc, "generateDTokenForOther", []interface{}{acc.Address, to, tokenTemplateId, n})
+}
+
+func (this *DTokenKit) BuildGenerateDTokenForOtherTx(acc, to common.Address, tokenTemplateId []byte,
+	n int) (*types.MutableTransaction, error) {
+	return this.bc.BuildTx(this.contractAddress, "generateDTokenForOther", []interface{}{acc, to, tokenTemplateId, n})
+}
+
 func (this *DTokenKit) BalanceOf(addr common.Address, tokenId []byte) (uint64, error) {
 	res, err := this.bc.PreInvoke(this.contractAddress, "balanceOf", []interface{}{addr, tokenId})
 	if err != nil {

@@ -21,7 +21,7 @@ const (
 	//dtokenContractAddress = "466b94488bf2ad1b1eec0ae7e49e40708e71a35d"
 
 	mpContractAddress     = "e7de9c28a6fd5c72d576c462b49e4335f4dfdbe2"
-	dtokenContractAddress = "a2c23b928883b75092178123c1a12cdb0c46f2bd"
+	dtokenContractAddress = "ff519626945ebad4d1be7bfbb95b142595c4e692"
 )
 
 const (

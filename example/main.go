@@ -91,7 +91,7 @@ func main() {
 	}
 
 	if false {
-		//dtoken ff519626945ebad4d1be7bfbb95b142595c4e692
+		//dtoken 45bc078c0664a11cce87d97864c5b3594c7c9f81
 		// mp e7de9c28a6fd5c72d576c462b49e4335f4dfdbe2
 		// openkg 41b47a0ec9d8992f382cc33910a9281ea21369f7
 		// split_contract 47d305e5ae4ceb736da6189224f15052f0e32357
@@ -101,7 +101,7 @@ func main() {
 
 	if false {
 		sdk.SetMpContractAddress(contractAddr)
-		dtoken, _ := common.AddressFromHexString("ff519626945ebad4d1be7bfbb95b142595c4e692")
+		dtoken, _ := common.AddressFromHexString("45bc078c0664a11cce87d97864c5b3594c7c9f81")
 		split, _ := common.AddressFromHexString("47d305e5ae4ceb736da6189224f15052f0e32357")
 		sdk.SetGasPrice(2500)
 		txHash, err := sdk.DefMpKit().Init(seller, dtoken, split)
@@ -139,7 +139,7 @@ func main() {
 		con := sdk.DefContract(contractAddr)
 		if true {
 			mp, _ := common.AddressFromHexString("e7de9c28a6fd5c72d576c462b49e4335f4dfdbe2")
-			dtoken, _ := common.AddressFromHexString("ff519626945ebad4d1be7bfbb95b142595c4e692")
+			dtoken, _ := common.AddressFromHexString("45bc078c0664a11cce87d97864c5b3594c7c9f81")
 			utils.Init(sdk, con, seller, mp, dtoken)
 			return
 		}

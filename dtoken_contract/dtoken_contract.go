@@ -34,6 +34,14 @@ func (this *DTokenKit) SetMpContractAddr(contractAddress common.Address, admin *
 		[]interface{}{addr})
 }
 
+func (this *DTokenKit) BuildSetMpContractAddrTx(contractAddress common.Address, mpContractAddress common.Address) (*types.MutableTransaction, error) {
+	if contractAddress == common.ADDRESS_EMPTY {
+		contractAddress = this.contractAddress
+	}
+	return this.bc.BuildTx(contractAddress, "setMpContract", []interface{}{mpContractAddress})
+
+}
+
 func (this *DTokenKit) GetMpContractAddr(contractAddress common.Address) (common.Address, error) {
 	if contractAddress == common.ADDRESS_EMPTY {
 		contractAddress = this.contractAddress

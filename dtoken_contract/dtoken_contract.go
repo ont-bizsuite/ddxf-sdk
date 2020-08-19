@@ -329,7 +329,7 @@ func (this *DTokenKit) SetTokenAgents(contractAddress common.Address, account *o
 	if contractAddress == common.ADDRESS_EMPTY {
 		contractAddress = this.contractAddress
 	}
-	return this.bc.Invoke(this.contractAddress, account, "setTokenAgents",
+	return this.bc.Invoke(contractAddress, account, "setTokenAgents",
 		[]interface{}{account.Address, tokenId, parseAddressArr(agents), parseNArr(n)})
 }
 
@@ -341,7 +341,7 @@ func (this *DTokenKit) BuildSetTokenAgentsTx(contractAddress common.Address, acc
 	if contractAddress == common.ADDRESS_EMPTY {
 		contractAddress = this.contractAddress
 	}
-	return this.bc.BuildTx(this.contractAddress, "setTokenAgents",
+	return this.bc.BuildTx(contractAddress, "setTokenAgents",
 		[]interface{}{account, tokenId, parseAddressArr(agents), parseNArr(n)})
 }
 

@@ -450,10 +450,13 @@ func main() {
 			}
 		}
 
-		//if err = useTokenByAgent(sdk, tokenId); err != nil {
-		//	fmt.Println("useTokenByAgent error: ", err)
-		//	return
-		//}
+		if true {
+			if err = useTokenByAgent(sdk, tokenId); err != nil {
+				fmt.Println("useTokenByAgent error: ", err)
+				return
+			}
+			return
+		}
 
 		if false {
 			if err = removeAgents(sdk, tokenId); err != nil {
@@ -462,12 +465,15 @@ func main() {
 			}
 		}
 
-		if true {
+		if false {
 			if err = setTokenAgents(sdk, tokenId); err != nil {
 				fmt.Println("setTokenAgents error: ", err)
 				return
 			}
 			return
+		}
+		if true {
+
 		}
 
 		if err = addTokenAgents(sdk, tokenId); err != nil {
@@ -592,11 +598,11 @@ func removeAgents(sdk *ddxf_sdk.DdxfSdk, tokenId []byte) error {
 
 func useTokenByAgent(sdk *ddxf_sdk.DdxfSdk, tokenId []byte) error {
 
-	txHash, err := sdk.DefDTokenKit().UseTokenByAgents(common.ADDRESS_EMPTY, buyer.Address, agent, tokenId, 1)
+	txHash, err := sdk.DefDTokenKit().UseTokenByAgents(common.ADDRESS_EMPTY, seller.Address, agent, tokenId, 1)
 	if err != nil {
 		return err
 	}
-	return showNotify(sdk, "UseTokenByAgents", txHash.ToHexString())
+	return showNotify(sdk, "useTokenByAgent", txHash.ToHexString())
 }
 
 func addAgents(sdk *ddxf_sdk.DdxfSdk, tokenId []byte) error {

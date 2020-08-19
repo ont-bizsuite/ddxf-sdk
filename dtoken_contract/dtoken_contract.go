@@ -299,7 +299,12 @@ func (this *DTokenKit) BuildUseTokenTx(contractAddress common.Address, buyer com
 	}
 	return this.bc.BuildTx(contractAddress, "useToken", []interface{}{buyer, tokenId, n})
 }
-
+func (this *DTokenKit) BuildUseTokenByAgentTx(contractAddress common.Address, owner, agent common.Address, tokenId []byte, n int) (*types.MutableTransaction, error) {
+	if contractAddress == common.ADDRESS_EMPTY {
+		contractAddress = this.contractAddress
+	}
+	return this.bc.BuildTx(contractAddress, "useTokenByAgent", []interface{}{owner, agent, tokenId, n})
+}
 func (this *DTokenKit) UseTokenByAgents(contractAddress common.Address, tokenOwner common.Address,
 	agent *ontology_go_sdk.Account, tokenId []byte, n int) (common.Uint256, error) {
 	if contractAddress == common.ADDRESS_EMPTY {
